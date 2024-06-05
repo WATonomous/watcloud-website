@@ -23,7 +23,7 @@ or [let us know](/docs/compute-cluster/support-resources).
 Before we dive into the details, let's define some common terms used in SLURM:
 
 - **Login node**: A node that users log into to submit jobs to the SLURM cluster. This is where you will interact with the SLURM cluster.
-- **Compute node**: A node that runs jobs submitted to the SLURM cluster. This is where your job will run. Compute nodes are not directly accessible by users.
+- **Compute node**: A node that runs jobs submitted to the SLURM cluster. This is where your job will run.
 - **Partition**: A logical grouping of nodes in the SLURM cluster. Partitions can have different properties (e.g. different resource limits) and are used to organize resources.
 - **Job**: A unit of work submitted to the SLURM cluster. A job can be interactive or batch.
 - **Interactive job**: A job that runs interactively on a compute node. This is useful for debugging or running short tasks.
@@ -34,13 +34,17 @@ Before we dive into the details, let's define some common terms used in SLURM:
 
 ## Quick Start
 
-To submit jobs to the SLURM cluster, you will need to log into one of the SLURM login nodes.
-During the beta, they are labelled `SL` in the [machine list](/machines).
-After the beta, all general-use machines will be SLURM login nodes.
+### SSH Into a SLURM Node
+
+To submit jobs to the SLURM cluster, you must first SSH into one of the SLURM login nodes.
+During the beta, they are machines labelled `SL` in the [machine list](/machines).
+After the beta, all general-use machines will be SLURM login nodes. 
+
+You can find steps to SSH into our machines [here](/docs/compute-cluster/ssh).
 
 ### Interactive shell
 
-Execute the following command to submit a job to the SLURM cluster:
+Once SSHed into a SLURM login node, you can execute the following command to submit a simple job to the SLURM cluster:
 
 ```bash copy
 srun --pty bash
