@@ -20,13 +20,14 @@ export function SocialLink({
     if (link.startsWith("mailto:")) {
         icon = <MailIcon size={iconSize} />;
         sr = "email";
-    } else if (link.startsWith("https://github.com")) {
+    } else if (link.startsWith("https://github.com") || link.startsWith("https://www.github.com")) {
         icon = <GithubIcon size={iconSize} />;
         sr = "github";
-    } else if (link.startsWith("https://linkedin.com")) {
+    } else if (link.startsWith("https://linkedin.com") || link.startsWith("https://www.linkedin.com")) {
         icon = <LinkedinIcon size={iconSize} />;
         sr = "linkedin";
-    } else if (link.startsWith("https://twitter.com") || link.startsWith("https://x.com")) {
+    } else if (link.startsWith("https://twitter.com") || link.startsWith("https://x.com") ||
+        link.startsWith("https://www.twitter.com") || link.startsWith("https://www.x.com")) {
         icon = <SiX size={iconSize} />;
         sr = "twitter";
     }
