@@ -1,8 +1,0 @@
-# Project-specific vocabulary - terms listed here will be considered correct.
-WATcloud
-watcloud
-WATonomous
-watonomous
-MiB
-GiB
-TiB 
