@@ -1,0 +1,18 @@
+extends: substitution
+message: "Use '%s' instead of '%s' for technical accuracy"
+link: https://www.nist.gov/pml/special-publication-811
+level: warning
+ignorecase: false
+swap:
+  # Byte units
+  '\bMB\b(?!\s?\/s)': MiB # Match MB not followed by /s
+  '\bGB\b(?!\s?\/s)': GiB
+  '\bTB\b(?!\s?\/s)': TiB
+  
+  # Common misspellings and incorrect formats
+  '\b[mM]b\b(?!\s?\/s)': 'MB (for bytes) or Mb (for bits)'
+  '\bmb\b': 'MB (for bytes) or Mb (for bits)'
+  
+  # Data transfer rates (keep as is, but offer documentation)
+  # '\bMB\/s\b': 'MB/s (megabytes per second)'
+  # '\bMb\/s\b': 'Mb/s (megabits per second)' 

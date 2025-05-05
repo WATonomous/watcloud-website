@@ -1,0 +1,11 @@
+extends: substitution
+message: "Use '%s' instead of '%s' for correct brand/organization capitalization"
+level: error
+ignorecase: true
+swap:
+  '\bWatCloud\b': WATcloud
+  '\bWATCloud\b': WATcloud
+  '\bWatcloud\b': WATcloud
+  
+  '\bWatonomous\b': WATonomous
+  '\bwatonomous\b': WATonomous 
