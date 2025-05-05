@@ -24,7 +24,7 @@ We use the following terminology
 ## General Guidelines
 
 - Read and understand the [WATcloud Guidelines](./guidelines) before starting development.
-- Pull-request early and often. We have a lot of safe guards and automation in place to help you follow best practices.
+- Pull-request early and often. We have a lot of safeguards and automation in place to help you follow best practices.
   When CI is run, look out for automated comments on and pull requests against your PR!
 - When writing commit messages and pull requests, start with a title that describes the change in imperative mood (e.g. "Add", "Fix", "Update")[^commit-message-convention],
   followed by more information in the body of the message. Use [linking keywords][linking-keywords] like `Resolves #<issue_number>` to automatically close issues.
@@ -341,7 +341,7 @@ In another terminal, we will work in the `infra-config` directory:
 cd infra-config
 ```
 
-We can mount the role into our development environment by making the following changes to `docker-compose.yml`:
+We can mount the provider into our development environment by making the following changes to `docker-compose.yml`:
 
 ```diff
 diff --git a/docker-compose.yml b/docker-compose.yml

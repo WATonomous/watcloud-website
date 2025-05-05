@@ -33,7 +33,7 @@ compute*     up 1-00:00:00 1-infinite   no       NO        all      3        idl
 ```
 
 In the output above, `tr-slurm1` is in the `drained` state, which means it is not available for running jobs.
-`thor-slurm1` is in the `mix` state, which means some jobs are running on it.
+`thor-slurm1` is in the `mixed` state, which means some jobs are running on it.
 All other nodes are in the `idle` state, which means there are no jobs running on them.
 
 To get a detailed overview of nodes in the cluster, you can run:
@@ -113,7 +113,7 @@ To see existing reservations, you can run:
 scontrol show reservation
 ```
 
-To delete a resservation, you can run:
+To delete a reservation, you can run:
 
 ```bash copy
 scontrol delete reservation <RESERVATION_NAME>
