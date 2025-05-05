@@ -36,3 +36,26 @@ jobs:
       run: |
         npm ci
         npm run build
+
+  lint-docs:
+    name: Lint Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Vale
+        uses: errata-ai/vale-action@v2.1.1
+        with:
+          # Optional: specify files/folders to lint. Default is 'all',
+          # which relies on the globs defined in .vale.ini.
+          # files: '["docs", "README.md"]'
+
+          # Reporter type for annotations. 'github-pr-check' adds inline comments.
+          reporter: github-pr-check
+
+          # Set to 'true' later to fail the build on errors/warnings
+          # Start with 'false' to allow gradual adoption and rule tuning.
+          fail_on_error: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,2 @@
+# Project-specific vocabulary - terms listed here will be considered correct.
+# Add terms one per line 
