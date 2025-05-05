@@ -36,3 +36,17 @@ jobs:
       run: |
         npm ci
         npm run build
+
+  codespell:
+    name: Check for common misspellings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Run CodeSpell
+        uses: codespell-project/actions-codespell@master
+        with:
+          check_filenames: true
+          skip: ".git,*.json,*.svg,*.css,node_modules,node_modules/*"
+          ignore_words_file: .github/codespell-ignore.txt

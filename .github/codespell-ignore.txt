@@ -1,0 +1,8 @@
+# Project-specific terms to ignore in CodeSpell
+WATcloud
+watcloud
+WATonomous
+watonomous
+MiB
+GiB
+TiB 

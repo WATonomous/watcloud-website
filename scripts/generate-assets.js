@@ -55,7 +55,7 @@ class WATcloudURI extends URL {
             throw new Error("Invalid WATcloud URI: protocol must be 'watcloud:'");
         }
         if (this.hostname !== "v1") {
-            throw new Error(`Invalid WATcloud URI: unsupport version "${this.hostname}". Only 'v1' is supported`);
+            throw new Error(`Invalid WATcloud URI: unsupported version "${this.hostname}". Only 'v1' is supported`);
         }
         this.sha256 = extractSha256(this.pathname);
         if (this.searchParams.has("name")) {

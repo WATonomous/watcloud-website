@@ -1,0 +1,9 @@
+repos:
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.5
+    hooks:
+      - id: codespell
+        args: [
+          '--ignore-words=.github/codespell-ignore.txt',
+          '--skip=".git,*.json,*.svg,*.css,node_modules,node_modules/*"'
+        ]

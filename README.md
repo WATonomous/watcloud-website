@@ -49,3 +49,16 @@ WATcloud admins can apply changes from the public repo to the internal repo by r
 PR_NUMBER=28
 curl https://patch-diff.githubusercontent.com/raw/WATonomous/watcloud-website/pull/$PR_NUMBER.patch | git am --directory=website
 ```
+
+## Development
+
+### Spell Checking
+
+This project uses [CodeSpell](https://github.com/codespell-project/codespell) to catch common spelling mistakes in documentation and code comments.
+
+To install the pre-commit hook:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
