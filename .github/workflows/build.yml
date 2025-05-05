@@ -35,7 +35,6 @@ jobs:
         FETCH_FIXTURES_FROM: http://cloud.watonomous.ca/fixtures
       run: |
         npm ci
-        npm run build
 
   codespell:
     name: Check for common misspellings
