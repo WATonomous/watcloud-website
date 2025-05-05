@@ -1,0 +1,3 @@
+[codespell]
+skip = .git,*.json,*.svg,*.css,node_modules,node_modules/*
+ignore-words = .github/codespell-ignore.txt 

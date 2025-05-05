@@ -1,8 +1,16 @@
 # Project-specific terms to ignore in CodeSpell
+# Brand names are handled in custom dictionary
 WATcloud
 watcloud
+WATCloud
+WatCloud
+Watcloud
+
 WATonomous
 watonomous
+Watonomous
+
+# Technical terms
 MiB
 GiB
 TiB 
