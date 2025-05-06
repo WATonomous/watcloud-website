@@ -4,4 +4,4 @@ WatCloud->WATcloud
 Watcloud->WATcloud
 watCloud->WATcloud
 watonomous->WATonomous
-Watonomous->WATonomous 
+Watonomous->WATonomous
