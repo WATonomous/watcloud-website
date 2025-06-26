@@ -30,26 +30,6 @@ Use the following machines to submit jobs. To get started, follow the [SSH](/doc
     </div>
 }
 
-### General-Use Machines (Legacy)
-
-The following machines are legacy general-use machines. They will be decommissioned in the near future.
-
-{
-    <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo.machines['legacy_general_use_machines'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
-    </div>
-}
-
-### Bastion Hosts (Legacy)
-
-The following machines are legacy bastion hosts. They will be decommissioned in the near future.
-
-{
-    <div className="items-start justify-center gap-6 rounded-lg p-8 grid md:grid-cols-2 xl:grid-cols-3">
-      { machineInfo.machines['bastions'].map((machine, index) => <MachineCard key={index} machine={machine} />) }
-    </div>
-}
-
 ### Bare-Metal Machines
 
 The following machines are reserved for running supporting services (hypervisor, distributed filesystem, NAS, etc.) for the cluster.

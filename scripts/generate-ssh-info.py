@@ -40,8 +40,6 @@ def generate_network_graph():
         h
         for h in get_hosts_in_group(host_config, "slurmd_nodes")
         if get_group_config(h, "slurmd_nodes")["slurm_role"] == "login"
-        and "legacy_general_use_machine"
-        not in (get_group_config(h, "tagged_nodes") or {}).get("tags", [])
     ]
 
     G = nx.Graph()

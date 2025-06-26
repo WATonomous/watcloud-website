@@ -257,23 +257,6 @@ export function MachineCard({
                             </dd>
                         </div>
                     ) : undefined}
-                    { 'ssh_host_keys_bastion' in machine && machine.ssh_host_keys_bastion.length ? (
-                        <div className="flex flex-col py-3 first:pt-0">
-                            <Popover>
-                                <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.ssh_host_keys_bastion.length, "SSH Host Key")} (Bastion){<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger>}</dt>
-                                <PopoverContent side="top">
-                                    <p>To improve security, we use a secondary, hardened SSH server on this machine for general access. This SSH server has a different set of host keys than the primary server, as shown below. The primary SSH server is accessible only to cluster administrators.</p>
-                                </PopoverContent>
-                            </Popover>
-                            <dd>
-                                <Pre hasCopyCode>
-                                    <Code>
-                                        {machine.ssh_host_keys_bastion.join('\n')}
-                                    </Code>
-                                </Pre>
-                            </dd>
-                        </div>
-                    ) : undefined}
                 </dl>
             </CardContent>
         </Card>

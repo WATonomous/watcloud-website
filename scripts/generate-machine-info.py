@@ -139,11 +139,9 @@ def get_lshw_info(data_path, host_name):
 def generate_fixtures(data_path):
     host_config = get_host_config()
 
-    legacy_general_use_machines = []
     slurm_compute_nodes = []
     slurm_login_nodes = []
     bare_metals = []
-    bastions = []
 
     for host in host_config["hosts"]:
         name = host["name"]
@@ -163,23 +161,7 @@ def generate_fixtures(data_path):
             "tags": tags,
         }
 
-        # TODO: Remove this when we delete all legacy general-use machines
-        if "legacy_general_use_machine" in node_tags:
-            assert "login_nodes" in group_names, f"{name} is a legacy general use machine but is not in a login node group"
-            login_nodes_config = get_group_config(host, "login_nodes")
-            properties.update({
-                "cpu_info": get_cpu_info(data_path, name),
-                "memory_info": get_memory_info(data_path, name),
-                "gpus": get_gpu_info(data_path, name),
-                "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
-                "lsb_release_info": get_lsb_release_info(data_path, name),
-                "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
-                "mounts_with_quotas": get_mounts_with_quotas(host),
-                "cpu_quota": login_nodes_config.get("cpu_quota"),
-                "memory_quota": login_nodes_config.get("memory_max"),
-            })
-            legacy_general_use_machines.append(properties)
-        elif "slurmd_nodes" in group_names:
+        if "slurmd_nodes" in group_names:
             slurmd_config = get_group_config(host, "slurmd_nodes")
             if slurmd_config["slurm_role"] == "compute":
                 properties.update({
@@ -212,22 +194,12 @@ def generate_fixtures(data_path):
                 "hosted_storage": get_hosted_storage(data_path, name),
             })
             bare_metals.append(properties)
-        elif "bastion_nodes" in group_names:
-            properties.update({
-                "cpu_info": get_cpu_info(data_path, name),
-                "memory_info": get_memory_info(data_path, name),
-                "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
-                "ssh_host_keys_bastion": get_file_lines(data_path, name, "ssh-host-keys-bastion.log"),
-            })
-            bastions.append(properties)
 
     return {
         "machines": {
-            "legacy_general_use_machines": sorted(legacy_general_use_machines, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
             "slurm_compute_nodes": sorted(slurm_compute_nodes, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
             "slurm_login_nodes": sorted(slurm_login_nodes, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
             "bare_metals": sorted(bare_metals, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
-            "bastions": sorted(bastions, key=lambda m: int(m["cpu_info"].get("logical_processors", 0)), reverse=True),
         },
         "global_user_disk_quotas": host_config["global_user_disk_quotas"],
     }

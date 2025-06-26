@@ -56,7 +56,7 @@ export function NodeLocalQuotaTable({
     className?: string
 }) {
     const rows = []
-    for (const machine of chain(machineInfo.machines.legacy_general_use_machines, machineInfo.machines.slurm_login_nodes)) {
+    for (const machine of chain(machineInfo.machines.slurm_login_nodes)) {
         for (const mount of (machine.mounts_with_quotas || [])) {
             rows.push(
                 <TableRow>
@@ -106,7 +106,7 @@ export function CPURAMQuotaTable({
     className?: string
 }) {
     const rows = []
-    for (const machine of chain(machineInfo.machines.legacy_general_use_machines, machineInfo.machines.slurm_login_nodes)) {
+    for (const machine of chain(machineInfo.machines.slurm_login_nodes)) {
         rows.push(
             <TableRow>
                 <TableCell>{machine.name}</TableCell>
