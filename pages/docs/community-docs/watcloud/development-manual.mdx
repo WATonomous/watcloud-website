@@ -401,4 +401,32 @@ Now, we can run the provisioner as usual. Terraform will use the local provider 
 - https://discuss.hashicorp.com/t/development-overrides-for-providers-under-development/18888/2
 - https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers
 
+## Quirks
+
+This section documents various quirks and workarounds that you might encounter while working with our infrastructure.
+
+### `wato-drive2` does not come up after reboot
+
+If `wato-drive2` does not automatically come up (`/dev/mapper/wato--drive2--vg-wato--drive2--lv--main` does not exist on `wato-rayside1`) after a reboot, run the following command on `wato-rayside1` to activate the logical volume:
+
+```bash copy
+lvchange -ay wato-drive2-vg/wato-drive2-lv-main
+```
+
+> Note: This command may take a few minutes to complete.
+
+Verify the status using the command:
+
+```bash copy
+lsblk
+```
+
+where you should see:
+
+```
+root@wato-rayside1:~# lsblk
+NAME                                                                                                  MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda                                                                                                     8:0    0  43.7T  0 disk
+└─wato--drive2--vg-wato--drive2--lv--main_wcorig                                                      253:8    0  43.6T  0 lvm
+```
 
