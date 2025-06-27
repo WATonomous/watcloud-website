@@ -4,16 +4,6 @@ import { GlobalQuotaTable, NodeLocalQuotaTable, CPURAMQuotaTable } from '@/compo
 
 To ensure that everyone has a fair share of resources, we enforce a set of quotas in the cluster.
 
-## Terminology
-
-- **Hard limit**: The limit that cannot be exceeded. If the hard limit for a disk quota is reached,
-    the user will receive a "disk quota exceeded" error when trying to write to the disk.
-- **Soft limit**: The limit that can be temporarily exceeded. We set the grace period to 7 days[^7-day-grace].
-    If the soft limit is reached for more than 7 days, the user will receive a "disk quota exceeded"
-    error when trying to write to the disk.
-
-[^7-day-grace]: The 7-day grace period is the default on most Linux quota implementations.
-
 ## Disk quotas
 
 ### Default disk quotas
@@ -25,12 +15,6 @@ This section lists the default per-user disk quotas. These quotas are subject to
 Global disk quotas are quotas on filesystems that are shared across all nodes.
 
 <GlobalQuotaTable className="mt-4" />
-
-#### Node-local disk quotas
-
-Node-local disk quotas are quotas on filesystems that are local to each node.
-
-<NodeLocalQuotaTable className="mt-4" />
 
 ### Checking your disk quota
 
@@ -83,36 +67,6 @@ ceph.dir.rbytes="18056911629"
 ceph.dir.rfiles="210104"
 ```
 
-#### `xfs`
-
-To check your disk quota, run the following command[^quota-command]:
-
- [^quota-command]: `quota` is a command-line utility that is available on most Linux installations with quota support. You can learn more about the command [here](https://linux.die.net/man/1/quota) or by running `man quota`
-
-```bash copy
-quota --human-readable=g,
-```
-
-For example, in the output below, the user `ben` has a soft limit of 30 GiB and a hard limit of 50 GiB on `/dev/sdc`, and has used 1 GiB of space.
-
-```bash
-> quota --human-readable=g,
-Disk quotas for user ben (uid 1507):
-     Filesystem   space   quota   limit   grace   files   quota   limit   grace
-       /dev/sdc      1G     30G    50G              51       0       0
-```
-
-to find out which mountpoint corresponds to `/dev/sdc`, run the following command:
-
-```bash
-> df -h /dev/sdc
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/sdc        200G   34G  167G  17% /var/lib/cluster
-```
-
-In this case, `/dev/sdc` is mounted on `/var/lib/cluster`. This drive is used to store docker-related data,
-as shown in the [Default disk quotas](#default-disk-quotas) section.
-
 ### Requesting a disk quota increase
 
 If you find that you regularly exceed your quotas, you can request for a quota increase by specifying your
@@ -123,7 +77,7 @@ profile using the [Profile Editor](../utilities/profile-editor).
 
 ## CPU and memory quotas
 
-On general-use machines, per-user CPU and memory quotas are enforced to ensure fair resource sharing.
+On login nodes, per-user CPU and memory quotas are enforced to prevent resource starvation:
 
 <CPURAMQuotaTable className="mt-4" />
 

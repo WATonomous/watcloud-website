@@ -127,8 +127,8 @@ scancel 4022
 
 ### Using Docker
 
-Unlike general use machines, the SLURM environment does not provide user-space systemd for managing background processes like the Docker daemon.
-To use Docker, you will need to start the Docker daemon manually. We have provided a convenience script to do this:
+We support [rootless Docker](https://docs.docker.com/engine/security/rootless/) on all compute nodes.
+To use Docker, first start the Docker daemon. A convenience script is provided to do this:
 
 ```bash copy
 slurm-start-dockerd.sh
@@ -145,6 +145,8 @@ docker run --rm hello-world
 
 Note that `slurm-start-dockerd.sh` places the Docker data directory in `/tmp`.
 You can request for more space using the `--gres tmpdisk:<size_in_MiB>` flag.
+
+The script runs completely in user space. You can customize the configuration by writing your own. The contents of the script can be viewed using `cat $(which slurm-start-dockerd.sh)`.
 
 
 ### Using GPUs
@@ -378,16 +380,6 @@ If you require a time limit greater than the maximum time limit for any partitio
 [^view-available-resources]: For more information on viewing available resources, see the [View available resources](#view-available-resources) section.
 
 ## Extra details
-
-### SLURM v.s. general-use machines
-
-The SLURM environment is configured to be as close to the general-use environment as possible.
-All of the same network drives and software are available. However, there are some differences:
-
-- The SLURM environment uses a `/tmp` drive for temporary storage instead of `/mnt/scratch` on general-use machines.
-    Temporary storage can be requested using the `--gres tmpdisk:<size_in_MiB>` flag.
-- The SLURM environment does not have a user-space systemd for managing background processes like the Docker daemon.
-    Please follow the instructions in the [Using Docker](#using-docker) section to start the Docker daemon.
 
 ### View available resources
 

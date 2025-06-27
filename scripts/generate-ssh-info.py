@@ -50,7 +50,7 @@ def generate_network_graph():
         G.add_node(network["name"], type="network", display_name=f"{network['name'].capitalize()} Network")
 
     for node in slurm_login_nodes:
-        # FIXME: This used to be for prioritizing bastion nodes over general use machines.
+        # FIXME: This used to be for prioritizing bastion nodes over other machines.
         # Now that bastion nodes are deprecated, this is just a placeholder for future use.
         priority = 5
 
