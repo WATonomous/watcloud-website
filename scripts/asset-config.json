@@ -91,7 +91,7 @@
         },
         {
             "name": "blog-vllm-wide",
-            "uri": "watcloud://v1/sha256:d136ba7c8733a39e3fbbe68bc7597a6194fb0ae94e7073bfcfd216ddeb5f38bb?name=2025-05-30%2005%2028_51%20openOutpaint%20image.png",
+            "uri": "watcloud://v1/sha256:62a626fe603d39705d0a8b3e4a01698b620c6d5eca6a967bbef62a692f615de2?name=ComfyUI_00017_.png",
             "optimize": true
         },
         {
