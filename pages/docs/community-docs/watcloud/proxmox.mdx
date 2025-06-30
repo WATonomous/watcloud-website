@@ -50,7 +50,7 @@ index 0000000000..8b157e1e13
 +  force_recreate_on_change_of = "v0.0.1"
 +
 +  name = "ha-microk8s1"
-+  desc = "(Provisioned by Terraform) This VM is used for backing up shared storages"
++  desc = "This VM is managed by Terraform. Please do not modify it manually."
 +  target_node = "wato-thor" # just for initial deployment
 +
 +  clone = "ubuntu-22-04-cloudinit-v1"
@@ -166,7 +166,7 @@ Terraform will perform the following actions:
       + cpu                         = "host"
       + default_ipv4_address        = (known after apply)
       + define_connection_info      = true
-      + desc                        = "(Provisioned by Terraform) This VM is used for backing up shared storages"
+      + desc                        = "This VM is managed by Terraform. Please do not modify it manually."
       + force_create                = false
       + force_recreate_on_change_of = "v0.0.1"
       + full_clone                  = true
