@@ -14,7 +14,6 @@ import { useState } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Input } from "./ui/input";
-import { useMDXComponents } from "nextra-theme-docs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Link } from "nextra-theme-docs"
@@ -121,9 +120,8 @@ export function UsernameToID() {
 
     // Use MDX components from the theme:
     // https://github.com/shuding/nextra/blob/33a2f9a5fe8eb58f78b4b9c8a671bc7f854ea504/packages/nextra-theme-docs/src/mdx-components.tsx#L113
-    const components = useMDXComponents();
-    const Summary = components.summary ?? "summary";
-    const Details = components.details ?? "details";
+    const Summary = "summary" as keyof JSX.IntrinsicElements;
+    const Details = "details" as keyof JSX.IntrinsicElements;
 
     const form = useForm<z.infer<typeof usernameToIDFormSchema>>({
         resolver: zodResolver(usernameToIDFormSchema),
