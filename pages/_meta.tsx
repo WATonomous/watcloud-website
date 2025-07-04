@@ -1,4 +1,4 @@
-export default {
+const meta = {
   "index": {
     "title": "Welcome",
     "type": "page",
@@ -38,4 +38,6 @@ export default {
   "onboarding-form": {
     "display": "hidden"
   }
-}
+};
+
+export default meta;
