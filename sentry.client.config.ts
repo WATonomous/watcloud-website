@@ -40,7 +40,9 @@ if (process.env.NODE_ENV === 'production') {
 
     tunnel: websiteConfig.sentry_tunnel,
 
-    integrations: [],
+    integrations: [
+      new Sentry.Integrations.Console(),
+    ],
   });
 
   // Lazy-load the Sentry Replay integration
