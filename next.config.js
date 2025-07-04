@@ -31,10 +31,12 @@ module.exports = {
 }
 
 // Add Nextra config
-const withNextra = require('nextra')({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
+const withNextra = require('nextra').default({
+  mdxOptions: {
+    rehypePlugins: [
+      // Add any rehype plugins if needed
+    ]
+  }
 });
   
 module.exports = withNextra(module.exports)
