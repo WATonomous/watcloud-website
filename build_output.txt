@@ -1,0 +1,145 @@
+
+> watcloud-website@0.0.1 build
+> npm run preprocess && next build && ./scripts/post-build.sh
+
+
+> watcloud-website@0.0.1 preprocess
+> npm run generate-fixtures
+
+
+> watcloud-website@0.0.1 generate-fixtures
+> ./scripts/generate-fixtures.sh
+
+Preparing workspace...
+Fetching fixtures from https://cloud.watonomous.ca/fixtures...
+Generating fixture types...
+Generating mdx files from data...
+Dumped 8 strings to /workspace/build/fixtures/ssh-info-strings
+Dumped 590 strings to /workspace/build/fixtures/user-schema-strings
+Compiling JSON schema validators...
+parsing the schema
+writing /workspace/build/fixtures/affiliation.schema.validate.js
+parsing the schema
+writing /workspace/build/fixtures/user.schema.validate.js
+Generating assets...
+Processing profile pictures...
+Using cached version of user-a6abdulm (sha256:16539f34281dcfabaab1c37bc30e434849091d20e9308648479d366a13d22775)
+Using cached version of user-aashichaubey (sha256:48e18a2ba67fc4beed743bf2c99c49612a537a2980ebcdaee3cc0f558d4c98d9)
+Using cached version of user-alexboden (sha256:3044b33cdea125cbc492b4b2fa6990766769b0eee0b2ccee3d555e456747ba02)
+Using cached version of user-alexzheng (sha256:be705bebf5f0dffbda66561ed5935ed4bf30fea136cd19c4e82238cfe5edb82e)
+Using cached version of user-amwhayho (sha256:24096e603f28a8fec35d7049827180b8461d0ac6b9351af0bf56f79944fd1bb0)
+Using cached version of user-ben (sha256:581c37fb0f993ae88e6a9583d7eaabe39cb2ecd606e6e1d20d2087bb3569f84f)
+Using cached version of user-benjamin-liu (sha256:ba8f0bf578cc1b113d7f902dd4aa9f5ac964554bddc566c5d66d7a1597152bc6)
+Using cached version of user-edem (sha256:9f096f542602b9e3e66f8cbcb6c4dbf550cde6cfda5ba9979a1e456ef73001e0)
+Using cached version of user-fowlfarmer (sha256:8d481533ea188d0def4c00f17be240cf9a6a46e3ab79a709e2a009fb763c9071)
+Using cached version of user-hjasat (sha256:55dcd6dec55d4873cd2766272dca2574bf6db3ef1c51cd092ba10107844ff8b8)
+Using cached version of user-j257jian (sha256:bbf874bd866589d30355fa21ad2e78c5b4632285cfeaef5767675c58532f6171)
+Using cached version of user-jalencheng (sha256:923ca084bfe1bafb4a402ed8774f62ad3140d5ac12eb91e711387ed315ff8a30)
+Using cached version of user-kevin-kang (sha256:0c231085dd7975d8cbbda51a70b7772a2c923e53ea73f4b04c65e434792e8b63)
+Using cached version of user-lily-jyw (sha256:981e4464df820b927e3fb7fc33fa1a8134c58b80e2b777538d15eb4c8affbad2)
+Using cached version of user-lspinoti (sha256:68794757c5624e618a232cd80c9dce5469392a42ab6c5d0008fffea578faaf50)
+Using cached version of user-miekale (sha256:07b79954ee04a0afea9172b7e9f7e56a35f894030112df045831c32b2a336ea1)
+Using cached version of user-mihirseth (sha256:391089cfa4496da1cacbdb58be0f397ea7ede95b68d7c96e586d8ba149826f7c)
+Using cached version of user-r342shar (sha256:cf36279a3c1a974b7175aaa4b8eabcad2c4f4b3e23e5687f4b8834fd7c358b3b)
+Using cached version of user-ryanfudge (sha256:a837acf250573cd3fae596275ca83ec79a8b095be23810ee61e33948a3dcff14)
+Using cached version of user-ryanrahman27 (sha256:4b1ba9ef9bd0638f84cabe03a839f38d4f82e6a14f9d33403d9da3dc07d83edc)
+Using cached version of user-s77shah (sha256:12eec2d273ec206bebfe922b1a5d022b3e362e6b8ba41ac5c86ba92f5de3c724)
+Using cached version of user-srbaraka (sha256:50a3c1647dd802420c94f2a803bcb5e171ca216524f8744dd3af54b3ad3dfe5c)
+Using cached version of user-t95zhou (sha256:9ef5af67d8d8a85aa4d630d8870b9b79adceedf81cb8a141742934ec36b84fe2)
+Using cached version of user-vdarosa (sha256:46772f13bc97b848eab076039870dcfb399743c4a4500399b6c0ac246690198b)
+Processing images...
+Using cached version of cloud-light (sha256:906f98c1d660a70a6b36ad14c559a9468fe7712312beba1d24650cc379a62360)
+Using cached version of cloud-dark (sha256:578d058bc16d5b52e93cc14f0d28ac0b4cf0a6e93b85db4a2c82a497ef43dc36)
+Using cached version of robot-light (sha256:439c9475cfe2202bbdf09dd60cd604564562ad2a2900c7b1c8eb6f392b961696)
+Using cached version of robot-dark (sha256:9490ceb060e2b58bd5235fe7351875ac7bb04791c0cdcbf35db364257e8ccd8d)
+Using cached version of computer-light (sha256:3453358de2456b805229ba30ebc48a74f1e9eb7c8fbf3176927c60bbf99c69cc)
+Using cached version of computer-dark (sha256:7dac34046e20b4a5c4982d2a7940fdb313687d030b72a297adcd2a84d138e099)
+Using cached version of server-room-light (sha256:c3b72b5fb4c7bdff14f293782a98d7b1a21c7f2d6479cb1fa3b1b196a2179f73)
+Using cached version of server-room-dark (sha256:216ca4fdc626b94daaad8a63be5c1a507f82abb2b3bed1839f6d0996ac3e84d2)
+Using cached version of under-the-hood-wide (sha256:5cc9868176110e693921b642ef69b43ea1d6728c822d824bb405e1fc1631b345)
+Using cached version of under-the-hood-square (sha256:68ee1c08c67cc5120cd46d22240be39813516037c53aaa2c27f3d5a593b776c5)
+Using cached version of doc-proxmox-primary-gpu (sha256:9b7b398205cf6508dce29f07023001baf5eebc287780d7220f50c6965da809ac)
+Using cached version of doc-kubernetes-cheat-sheet-k9s (sha256:1b2c797f0f07e69081a2a89924b17a017734efde1c0af34e1b45b411bf92a9ee)
+Using cached version of blog-slurm-ci-graph-light (sha256:d8991488dddf8a2f6841d244f365d2f6c613ec26c08909526df2a372eebdccd4)
+Using cached version of blog-slurm-ci-graph-dark (sha256:117315381bacf8b9175256f025190912049606b388c83ff3d62103333dd99b60)
+Using cached version of blog-slurm-ci-square (sha256:52b4d271c4beafdd746f48b5565316c4711ac988ca72f581f5ad9d7c9bcdf0e9)
+Using cached version of blog-slurm-ci-wide (sha256:c0780dc206334a15c1c3d9b67ad15c6967c79f4854edb41fe2e9c8b0fb0408f6)
+Using cached version of blog-slurm-ci-pipeline-light (sha256:4e16fc15144dd402e36346ca5b99f5da1ceb80958e853c00098daca8d45427de)
+Using cached version of blog-slurm-ci-pipeline-dark (sha256:5ee571f08a854a6e3cd15731abe1199eb6cc89aea0b8180a03ee0395b6488af0)
+Using cached version of blog-vllm-tmux (sha256:e8e70de0b157d4749ce563564c873b39951d126aee7938c97905ee9bda9478fa)
+Using cached version of blog-vllm-wide (sha256:62a626fe603d39705d0a8b3e4a01698b620c6d5eca6a967bbef62a692f615de2)
+Using cached version of blog-vllm-square (sha256:c6ab96a63d928391a73c9e7ce9eb5f770116215f3f117d41f6396a86ccc56304)
+Assets generated successfully
+   Skipping validation of types
+   Skipping linting
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Collecting page data ...
+   Generating static pages (0/46) ...
+   Generating static pages (11/46) 
+   Generating static pages (22/46) 
+   Generating static pages (34/46) 
+ ✓ Generating static pages (46/46) 
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (pages)                                             Size     First Load JS
+┌ ○ /                                                     4.58 kB         330 kB
+├   └ css/0110e3f8d60db952.css                            515 B
+├   /_app                                                 0 B             326 kB
+├ ● /_meta                                                245 B           326 kB
+├ ○ /404                                                  184 B           326 kB
+├ ○ /blog                                                 4.14 kB         330 kB
+├ ● /blog/_meta                                           250 B           326 kB
+├ ○ /blog/hello-world                                     3.74 kB         330 kB
+├ ○ /blog/using-slurm-to-run-github-actions               9.96 kB         336 kB
+├ ○ /blog/vllm                                            7.87 kB         334 kB
+├ ○ /blog/what-is-watcloud                                4.93 kB         331 kB
+├ ○ /docs                                                 2.52 kB         332 kB
+├ ● /docs/_meta                                           249 B           326 kB
+├ ○ /docs/community-docs                                  937 B           331 kB
+├ ● /docs/community-docs/_meta                            257 B           326 kB
+├ ○ /docs/community-docs/watcloud                         2.46 kB         332 kB
+├ ○ /docs/community-docs/watcloud/development-manual      12.9 kB         339 kB
+├ ○ /docs/community-docs/watcloud/guidelines              5.96 kB         335 kB
+├ ○ /docs/community-docs/watcloud/kubernetes-cheat-sheet  4.61 kB         331 kB
+├ ○ /docs/community-docs/watcloud/maintenance-manual      11.9 kB         338 kB
+├ ○ /docs/community-docs/watcloud/observability           5.75 kB         332 kB
+├ ○ /docs/community-docs/watcloud/proxmox                 13.6 kB         343 kB
+├ ○ /docs/community-docs/watcloud/user-requests           5.49 kB         331 kB
+├ ○ /docs/compute-cluster                                 1.62 kB         331 kB
+├ ● /docs/compute-cluster/_meta                           262 B           326 kB
+├ ○ /docs/compute-cluster/firewall                        4.36 kB         330 kB
+├ ○ /docs/compute-cluster/getting-access                  1.27 kB         331 kB
+├ ○ /docs/compute-cluster/machine-usage-guide             4.28 kB         330 kB
+├ ○ /docs/compute-cluster/overview                        3.9 kB          330 kB
+├ ○ /docs/compute-cluster/quotas                          3.11 kB         332 kB
+├ ○ /docs/compute-cluster/slurm                           15.2 kB         341 kB
+├ ○ /docs/compute-cluster/ssh                             6.19 kB         348 kB
+├ ○ /docs/compute-cluster/support-resources               4.01 kB         330 kB
+├ ○ /docs/compute-cluster/user-manual                     7.51 kB         333 kB
+├ ○ /docs/registered-affiliations                         3.63 kB         451 kB
+├ ○ /docs/services                                        1.96 kB         352 kB
+├ ● /docs/utilities/_meta                                 257 B           326 kB
+├ ○ /docs/utilities/assets                                93.6 kB         428 kB
+├   └ css/a5b92f49cf09a125.css                            10.9 kB
+├ ○ /docs/utilities/github                                7.29 kB         333 kB
+├ ○ /docs/utilities/onboarding-form                       1.63 kB         511 kB
+├ ○ /docs/utilities/profile-editor                        4.59 kB         330 kB
+├ ○ /get-involved                                         3.81 kB         330 kB
+├ ● /get-involved/_meta                                   256 B           326 kB
+├ ○ /get-involved/join                                    12.5 kB         338 kB
+├ ○ /get-involved/sponsor                                 5.99 kB         332 kB
+├ ○ /machines                                             9.03 kB         338 kB
+└ ○ /onboarding-form                                      748 B           510 kB
++ First Load JS shared by all                             347 kB
+  ├ chunks/framework-ca706bf673a13738.js                  45.4 kB
+  ├ chunks/main-66d85fc6f7952338.js                       33.1 kB
+  ├ chunks/pages/_app-1b3feb4d2eb94cf5.js                 245 kB
+  ├ chunks/webpack-98ed34a089c3be27.js                    2.83 kB
+  └ css/df6afe2a467e3754.css                              21.2 kB
+
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+
+Running post-build commands...
