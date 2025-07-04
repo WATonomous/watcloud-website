@@ -1,7 +1,7 @@
 import { DiscordIcon } from 'nextra/icons'
 import { Bot, Heart, Code2 } from "lucide-react"
 import websiteConfig from '@/build/fixtures/website-config.json'
-import { Link } from "nextra-theme-docs"
+import { Link, useConfig } from "nextra-theme-docs"
 import { BlogPostHeader, BlogPostFooter } from '@/components/blog-post'
 import { useRouter } from 'next/router'
 
@@ -68,25 +68,99 @@ const themeConfig = {
       titleTemplate: '%s - WATcloud',
     }
   },
-  head: () => (
-    <>
-      <meta name="apple-mobile-web-app-title" content="Nextra" />
-      <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-      <link rel="icon" href="/favicon.png" type="image/png" />
+  head: function Head() {
+    const { frontMatter } = useConfig();
+    const { route } = useRouter();
+    
+    // Check if this is a blog post
+    const isBlogPost = route.startsWith('/blog/') && route !== '/blog';
+    
+    // Default meta tags
+    const metaTags = [
+      <meta key="apple-mobile-web-app-title" name="apple-mobile-web-app-title" content="WATcloud" />,
+      <link key="icon-svg" rel="icon" href="/favicon.svg" type="image/svg+xml" />,
+      <link key="icon-png" rel="icon" href="/favicon.png" type="image/png" />,
       <link
+        key="icon-dark-svg"
         rel="icon"
         href="/favicon-dark.svg"
         type="image/svg+xml"
         media="(prefers-color-scheme: dark)"
-      />
+      />,
       <link
+        key="icon-dark-png"
         rel="icon"
         href="/favicon-dark.png"
         type="image/png"
         media="(prefers-color-scheme: dark)"
       />
-    </>
-  ),
+    ];
+
+    // Add Open Graph and Twitter Card meta tags for blog posts
+    if (isBlogPost && frontMatter) {
+      const { title, description, title_image } = frontMatter;
+      const siteUrl = 'https://cloud.watonomous.ca'; // TODO: Get from config
+      const currentUrl = `${siteUrl}${route}`;
+
+      // Add basic Open Graph tags
+      metaTags.push(
+        <meta key="og:type" property="og:type" content="article" />,
+        <meta key="og:site_name" property="og:site_name" content="WATcloud" />,
+        <meta key="og:url" property="og:url" content={currentUrl} />
+      );
+
+      if (title) {
+        metaTags.push(
+          <meta key="og:title" property="og:title" content={`${title} - WATcloud`} />,
+          <meta key="twitter:title" name="twitter:title" content={`${title} - WATcloud`} />
+        );
+      }
+
+      if (description) {
+        metaTags.push(
+          <meta key="og:description" property="og:description" content={description} />,
+          <meta key="twitter:description" name="twitter:description" content={description} />
+        );
+      }
+
+      // Add image meta tags if title_image exists
+      if (title_image) {
+        // For now, we'll create a simple mapping from image keys to static paths
+        // In production, this would use the actual image fixtures
+        const imageKey = title_image.wide || title_image.square;
+        let imageUrl = '';
+        
+        // Simple static mapping for known blog images
+        if (imageKey === 'blog-vllm-wide' || imageKey === 'blog-vllm-square') {
+          imageUrl = `${siteUrl}/images/blog-vllm.png`;
+        }
+        
+        if (imageUrl) {
+          metaTags.push(
+            <meta key="og:image" property="og:image" content={imageUrl} />,
+            <meta key="og:image:width" property="og:image:width" content="800" />,
+            <meta key="og:image:height" property="og:image:height" content="400" />,
+            <meta key="twitter:card" name="twitter:card" content="summary_large_image" />,
+            <meta key="twitter:image" name="twitter:image" content={imageUrl} />
+          );
+          
+          if (title_image.attribution) {
+            metaTags.push(
+              <meta key="og:image:alt" property="og:image:alt" content={title_image.attribution} />,
+              <meta key="twitter:image:alt" name="twitter:image:alt" content={title_image.attribution} />
+            );
+          }
+        }
+      } else {
+        // Add basic Twitter card for blog posts without images
+        metaTags.push(
+          <meta key="twitter:card" name="twitter:card" content="summary" />
+        );
+      }
+    }
+
+    return <>{metaTags}</>;
+  },
   footer: {
     text: (
       // Maybe create a footer component instead?
