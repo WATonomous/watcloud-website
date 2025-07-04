@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === 'production') {
     debug: false,
 
     integrations: [
-      Sentry.captureConsoleIntegration(),
+      new Sentry.Integrations.Console(),
     ],
   });
 }

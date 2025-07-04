@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production') {
     tunnel: websiteConfig.sentry_tunnel,
 
     integrations: [
-      Sentry.captureConsoleIntegration(),
+      new Sentry.Integrations.Console(),
     ],
   });
 
