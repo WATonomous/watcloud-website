@@ -25,7 +25,7 @@ BACKOFF_BASE = 10 # base (seconds) for linear or exponential backoffs
 # Since these links are external, these links will not be recursed on
 # when searching for links on a page.
 WHITELISTED_URLS = [
-        "https://www.linkedin.com/in/alex-boden/"
+    "https://www.linkedin.com/in/alex-boden/"
 ]
 
 # Broken links that have these as a prefix will be ignored.
@@ -37,6 +37,7 @@ WHITELISTED_PREFIXES = [
     # FIXME: ceph.io is down and blocking PRs. This is a temporary workaround
     # Discussion here: https://discord.com/channels/478659303167885314/1331445846121644133
     "https://ceph.io",
+    "https://rgw-preview.watonomous.ca/cdn-cgi/l/email-protection", # This is a Cloudflare email protection link
 ]
 
 # These are the URL schemes that are treated as links (internal and external)
