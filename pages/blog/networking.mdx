@@ -212,7 +212,7 @@ We initially used DNS round-robin for load balancing across multiple ingress nod
 #### Cluster Traffic Strategy
 For cluster communication, we use DNS round-robin with health-aware routing. Our [custom-built Automatic DNS Failover Agent](https://github.com/WATonomous/automatic-dns-failover) continuously monitors node health and dynamically updates DNS records, adding or removing entries as nodes become available or go offline.
 
-## Kubernetes Ingress Architecture
+## SLURM Networking in Kubernetes
 
 Running **SLURM** inside Kubernetes introduces a networking requirement: the controller (`slurmctld`) and the compute daemons (`slurmd`) must both be able to initiate and accept TCP connections. One-way exposure is insufficient.
 
