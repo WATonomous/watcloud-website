@@ -1,0 +1,270 @@
+---
+title: 'WATcloud Network Architecture: A Dual-Network Design for High-Performance Computing'
+description: "Explore the design and evolution of WATcloud's network infrastructure, featuring a dual-network architecture that separates campus connectivity from high-performance cluster communication. Learn how we simplified our network stack by moving from software overlay networks to reliable physical infrastructure with 10-Gigabit backbone and network bonding for resilience."
+title_image:
+  square: 'blog-networking-square'
+  wide: 'blog-networking-wide'
+  attribution: |
+    Image generated using Google Imagen 4 using the content of this blog post as a prompt.
+date: 2025-08-05
+timezone: America/Vancouver
+authors:
+  - ben
+reviewers: []
+notify_subscribers: true
+hidden: false
+---
+
+WATcloud's compute cluster relies on a carefully designed network architecture that separates different types of traffic to ensure optimal performance and reliability. In this post, we'll dive deep into our dual-network design, explore the tools we use for network diagnostics, and share the story of how we evolved from a complex overlay network to a simplified, high-performance infrastructure.
+
+## The Challenge: Balancing Performance and Connectivity
+
+When building a high-performance computing cluster, network design becomes critical. We need to support two distinct types of traffic:
+
+1. **General connectivity** for internet access, package downloads, and remote management
+2. **High-performance communication** between cluster nodes for distributed storage and compute workloads
+
+Mixing these traffic types on a single network can lead to congestion, unpredictable latency, and performance bottlenecks. Our solution: a dual-network architecture that physically separates these concerns.
+
+## Core Architecture: The Dual-Network Design
+
+### The "Campus" Network (Uplink)
+
+Our campus network provides standard connectivity to the outside world:
+
+- **Purpose**: General-purpose internet access and remote management
+- **Speed**: 1-Gigabit Ethernet connections
+- **Use Cases**:
+  - Package downloads (`apt update`, `pip install`, etc.)
+  - System updates and security patches  
+  - SSH access for team members from the university network
+  - External API calls and data downloads
+
+This network handles all the "everyday" traffic that doesn't require high performance but needs reliable internet connectivity.
+
+### The "Cluster" Network (Backbone)
+
+Our cluster network is a private, high-speed backbone designed for performance-critical communication:
+
+- **Hardware**: Built around a 10/40-Gigabit switch
+- **Purpose**: Internal node-to-node communication
+- **Primary Use Cases**:
+  - **Distributed File System**: Powers our Ceph storage cluster, providing the high-throughput, low-latency connections required for fast file access across all nodes
+  - **High-Performance Computing**: Supports data-intensive applications like distributed machine learning training where inter-node communication is often the bottleneck
+
+By isolating this traffic on dedicated multi-Gigabit infrastructure, we guarantee consistent performance for our most demanding workloads.
+
+## Maximizing Bandwidth with Network Bonding
+
+For storage-intensive workloads, maximizing available network bandwidth is critical. We deploy **multi-NIC network cards** and use **Linux network bonding** (link aggregation) on **machines that host NAS drives** and storage services, combining multiple physical network interfaces into a single logical interface (`bond0`).
+
+### Bonding Configuration
+
+We use the **balance-alb** (Adaptive Load Balancing) bonding mode, which provides several advantages:
+
+**Benefits of balance-alb mode:**
+- **Outbound load balancing**: Distributes outgoing traffic across multiple interfaces based on current load
+- **Inbound load balancing**: Uses ARP negotiation to balance incoming traffic
+- **No switch configuration required**: Works with standard switches without special configuration
+- **Fault tolerance**: Automatically handles interface failures
+
+**Drawbacks to consider:**
+- **CPU overhead**: The load balancing algorithms consume some CPU cycles
+- **Complexity**: More complex than simple active-backup bonding modes
+- **ARP dependency**: Relies on ARP manipulation which some network environments may not support optimally
+
+The primary benefit is **increased bandwidth** by combining multiple network links. For example, bonding two 10-Gigabit interfaces provides up to 20 Gbps of aggregate throughput, which is essential for storage-intensive operations like:
+
+- **NAS storage serving**: High-throughput file access for multiple concurrent users
+- **Distributed storage replication** across Ceph nodes
+- **Large dataset transfers** between storage and compute nodes
+- **Backup and archival operations**
+
+This bandwidth aggregation ensures our storage infrastructure can fully utilize available network capacity for data-intensive workloads.
+
+## Automated Network Configuration
+
+Our cluster network automation has two phases:
+
+**Initial Provisioning Phase:**
+- The 10/40-Gigabit cluster switch runs its own **DHCP server**
+- During initial setup, nodes automatically receive temporary IP addresses on the cluster network
+- The DHCP server updates a local **DNS server** with each node's hostname and IP mapping
+
+**Production Phase:**
+- Once provisioned, each node is assigned a **static IP address** to maintain network stability
+- Static addressing eliminates potential issues with lease renewals or IP changes
+- New DNS entries are assigned using global DNS (the cluster DNS is no longer used)
+- Result: All nodes can reliably find each other by hostname (e.g., `ping node-01`) with consistent addressing
+
+This hybrid approach combines the convenience of automated initial setup with the reliability of static addressing and dedicated DNS management for production operations.
+
+## Network Diagnostics and Performance Tools
+
+We use several Linux command-line tools for network management and troubleshooting:
+
+### Interface and Link Status
+
+```bash
+# List all network interfaces and IP addresses
+ip a
+
+# Check physical link status and speed
+ethtool eth0
+# Expected output for 10GbE: Speed: 10000Mb/s
+```
+
+### Real-Time Monitoring
+
+```bash
+# Launch bandwidth monitoring dashboard
+bmon
+```
+
+`bmon` provides a real-time, text-based interface showing Rx/Tx bandwidth for each network interface. This helps identify which nodes are communicating and the volume of data being transferred.
+
+### Performance Testing
+
+```bash
+# Run network performance benchmark between nodes
+# On receiving node:
+iperf -s
+
+# On sending node:
+iperf -c <target-node-ip>
+```
+
+`iperf` actively benchmarks network performance by generating high-volume traffic between nodes, measuring actual achievable throughput under load.
+
+## The Evolution: From Complex to Simple
+
+Our network architecture has undergone significant evolution, driven by a key engineering principle: **eliminate complexity that no longer serves a purpose**.
+
+### The Old System: Software Overlay Networks
+
+In our early days, the physical network hardware was less reliable, leading to intermittent connectivity issues. Our solution was **Yggdrasil**, an experimental software-based overlay network that created an encrypted, virtual network on top of our physical links.
+
+While the overlay approach seemed promising in theory, **the reality was that it did more harm than good**:
+
+**Theoretical benefits:**
+- Dynamic traffic re-routing if physical paths failed
+- Encrypted communication between nodes
+- Abstraction layer that could work around hardware issues
+
+**Practical problems we encountered:**
+- **Experimental software instability**: Yggdrasil was still in development, leading to unpredictable behavior
+- **Significant performance overhead**: The software overlay introduced substantial latency and reduced maximum bandwidth
+- **Random connectivity loss**: Nodes would unpredictably lose connectivity to the overlay network, requiring manual intervention
+- **Complex debugging**: When network issues occurred, diagnosing whether the problem was physical hardware, overlay software, or configuration became extremely difficult
+- **Bandwidth limitations**: The overlay processing couldn't keep up with high-speed network interfaces, becoming a bottleneck
+
+### The New System: Reliable Physical Infrastructure
+
+As our cluster matured, we focused on improving the fundamentals of our physical infrastructure:
+- **Server room organization**: Cleaned up the server room and implemented proper cable management
+- **Cable management best practices**: Ensured all cables are properly organized without tension or strain
+- **More robust connections**: Eliminated loose connections and potential failure points
+- **Network bonding**: Added redundancy for critical storage nodes
+
+**The key realization:** Most of our reliability issues weren't hardware quality problems—they were **basic infrastructure management problems**. Once we properly organized cables and eliminated physical stress points, our network became remarkably stable. The overlay network was no longer solving a real problem. Instead, it was:
+- Adding unnecessary complexity to debug and maintain
+- Introducing significant performance overhead
+- Creating another potential failure point
+
+### The Engineering Decision
+
+We made the conscious decision to **remove the Yggdrasil overlay entirely**. This simplified our entire network stack while maintaining the same level of reliability through improved hardware and network bonding.
+
+This evolution illustrates an important principle in infrastructure engineering: regularly evaluate whether existing solutions still solve current problems, and don't be afraid to simplify when complexity is no longer justified.
+
+## Performance Impact
+
+The dual-network design delivers measurable performance benefits:
+
+- **Distributed Storage**: Ceph replication and data access benefit from dedicated 10/40-Gigabit bandwidth, ensuring consistent performance even under heavy I/O loads
+- **Machine Learning Workloads**: Multi-node training jobs can communicate without competing with internet traffic for bandwidth
+- **Isolation**: Campus network issues (congestion, maintenance) don't affect cluster-internal operations
+
+Using `iperf` testing, we consistently achieve near line-rate performance (9+ Gbps) on the cluster network, while maintaining reliable 1-Gigabit connectivity to the internet.
+
+## Kubernetes Ingress Architecture
+
+Beyond our core compute cluster, WATcloud runs an on-prem Kubernetes cluster that serves various internal (e.g. CI caching, observability tooling, SLURM controller), and external (e.g. user management, asset system, object storage) services. Our Kubernetes ingress architecture builds on top of the dual-network foundation to provide scalable, fault-tolerant access to containerized services.
+
+### Ingress Controller Strategy
+
+We deploy **NGINX Ingress Controller** as our primary ingress solution with a pragmatic approach to high availability:
+
+#### External Traffic Strategy
+We initially used DNS round-robin for load balancing across multiple ingress nodes, but discovered a critical flaw: when a node goes down, some requests fail because DNS continues routing traffic to the downed node.
+
+**Our High Availability (HA) Solution:**
+- Deploy a **highly available Kubernetes node** using **Proxmox's HA feature**
+- Run the NGINX Ingress Controller exclusively on this HA node
+- **Proxmox HA** ensures the node stays up (handles VM-level failures)
+- **Kubernetes** ensures the service containers stay running (relocates containers away from failed nodes)
+
+**Trade-offs of this approach:**
+- **Upside**: Simple, reliable single point of entry with managed HA
+- **Downside**: All external traffic flows through one entry point
+- **Suitability**: Good for low-traffic environments; may need to switch to external load balancer for high-traffic scenarios
+
+#### Cluster Traffic Strategy
+For cluster communication, we use DNS round-robin with health-aware routing. Our [custom-built Automatic DNS Failover Agent](https://github.com/WATonomous/automatic-dns-failover) continuously monitors node health and dynamically updates DNS records, adding or removing entries as nodes become available or go offline.
+
+## Kubernetes Ingress Architecture
+
+Running **SLURM** inside Kubernetes introduces a networking requirement: the controller (`slurmctld`) and the compute daemons (`slurmd`) must both be able to initiate and accept TCP connections. One-way exposure is insufficient.
+
+### Attempt 1: NodePort
+
+We initially exposed `slurmctld` via a **NodePort** service. By default, NodePort performs source NAT, rewriting client IPs ([docs](https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-type-nodeport)). SLURM encodes and relies on peer IP information, so replies from the controller did not reach the real compute node, causing handshakes to fail.
+
+Setting `externalTrafficPolicy: Local` removes the NAT behavior and restores real client IPs. The tradeoff is that traffic must land on the Kubernetes node that is actually hosting the `slurmctld` pod. If that node is drained or goes down, connectivity breaks until the pod reschedules. This is not acceptable for fault tolerance.
+
+### Final approach: Tailscale mesh
+
+We moved SLURM control traffic to a **Tailscale** mesh:
+
+- Every compute node and every Kubernetes node runs the Tailscale agent in the same tailnet.
+- The `slurmctld` pod receives a tailnet IP via a lightweight sidecar, which follows the pod when it moves.
+- `slurmd` daemons connect directly to the controller's tailnet IP. No Kubernetes NAT is involved, and true bidirectional traffic flows end-to-end.
+
+**Benefits of this approach:**
+
+- **Bidirectional connectivity:** SLURM handshakes now work natively, with both controller and compute nodes able to initiate communication.
+- **Fault tolerance:** The controller pod can move between nodes without changing its address, so failover is seamless.
+- **Simplicity:** No need for LoadBalancer hardware, node pinning, or managing ports per node.
+- **Security:** All control-plane traffic is encrypted end-to-end by Tailscale using WireGuard.
+
+While adding Tailscale introduces some complexity—similar in principle to our earlier use of overlay networks like Yggdrasil—we've found Tailscale to be significantly more reliable in production. To date, we haven't encountered major issues, and the operational benefits have outweighed the overhead.
+
+## Future Considerations
+
+As our cluster continues to grow, we're evaluating several network enhancements:
+
+- **25/40-Gigabit Upgrades**: For even higher throughput on storage-intensive workloads
+- **Network Monitoring**: Enhanced observability with tools like Prometheus and Grafana for network metrics
+- **Software-Defined Networking**: Exploring SDN solutions for more flexible traffic management
+
+## Lessons Learned
+
+Building and evolving WATcloud's network taught us several valuable lessons:
+
+1. **Start Simple**: Begin with well-understood, reliable technologies before adding complexity
+2. **Physical Matters**: Investing in quality hardware (cables, switches, NICs) pays dividends in stability
+3. **Measure Everything**: Use monitoring tools to understand actual usage patterns and performance
+4. **Simplify When Possible**: Regularly evaluate whether added complexity still serves its original purpose
+5. **Design for Growth**: Plan network capacity for future expansion, not just current needs
+
+## Conclusion
+
+WATcloud's dual-network architecture demonstrates that thoughtful network design doesn't require cutting-edge complexity. By separating concerns, investing in reliable hardware, and simplifying our stack over time, we've built a network that reliably supports both everyday operations and high-performance computing workloads.
+
+The evolution from overlay networks to simplified physical infrastructure shows the importance of continuously evaluating your architecture. Sometimes the best engineering decision is to remove complexity that no longer serves its purpose.
+
+As we continue expanding WATcloud's capabilities, our network foundation provides the performance and reliability needed to support the next generation of student research and innovation.
+
+---
+
+*Want to learn more about WATcloud's infrastructure? Check out our other posts in the "Under the Hood" series, covering topics from hardware setup to distributed storage configuration.*
