@@ -52,6 +52,31 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckSquareIcon } from "lucide-react"
 
 
+### Improve the landing page
+
+Currently, the landing page is pretty bare. Let's make it look nicer by adding a hero image. Find more info [here](https://github.com/WATonomous/watcloud-website/issues/24).
+
+### Add a blog post tag system
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/3038 */}
+
+We have a blog post system that is powered by [Nextra](https://nextra.site/). We would like to add a tag system to the blog posts. This can be done by adding a new field to the blog post metadata. Find more info [here](https://github.com/WATonomous/watcloud-website/issues/44). 
+
+
+### Open Source Tickets
+
+Some of our open-source projects have open tickets that anyone can work on.
+Here's a collection of tickets that we think are suitable for new contributors:
+
+- [ ] [Support displaying job dependencies via flows](https://github.com/WATonomous/github-actions-tracing/issues/12) ([GitHub Actions Tracing](https://github.com/WATonomous/github-actions-tracing))
+- [ ] [Use SMTP pool to send emails](https://github.com/WATonomous/terraform-provider-email/issues/12)
+- [x] [Support Dark Mode](https://github.com/WATonomous/watcloud-emails/issues/17) ([WATcloud Emails](https://github.com/WATonomous/watcloud-emails/))
+
+
+### Internal Tickets and Hardware Projects
+
+If you are interested in working on a project that is not listed above, such as hardware projects (e.g. building computers, upgrading networking hardware) or projects that directly affect our infrastructure (Kubernetes, Terraform, Ansible, etc.), you can reach out to us on <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord</Link>, email infra-outreach@watonomous.ca or fill out the [onboarding-form](/docs/utilities/onboarding-form) as an incoming member which you can find instructions for [here](/docs/community-docs/watcloud#overview).
+
 ### Automated Power Outage Notification System
 
 <Callout type="info">
@@ -95,20 +120,6 @@ Here are some initial commands the CLI tool should have:
 - `watcloud quota list`: List the quota usage of the user. Can be expanded in the future to submit quota edit requests.
 - `watcloud daemon status`: Get the status of user daemons like Docker rootless.
 
-
-### Open Source Tickets
-
-Some of our open-source projects have open tickets that anyone can work on.
-Here's a collection of tickets that we think are suitable for new contributors:
-
-- [ ] [Support displaying job dependencies via flows](https://github.com/WATonomous/github-actions-tracing/issues/12) ([GitHub Actions Tracing](https://github.com/WATonomous/github-actions-tracing))
-- [ ] [Use SMTP pool to send emails](https://github.com/WATonomous/terraform-provider-email/issues/12)
-- [x] [Support Dark Mode](https://github.com/WATonomous/watcloud-emails/issues/17) ([WATcloud Emails](https://github.com/WATonomous/watcloud-emails/))
-
-
-### Internal Tickets and Hardware Projects
-
-If you are interested in working on a project that is not listed above, such as hardware projects (e.g. building computers, upgrading networking hardware) or projects that directly affect our infrastructure (Kubernetes, Terraform, Ansible, etc.), you can reach out to us on <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord</Link>, email infra-outreach@watonomous.ca or fill out the [onboarding-form](/docs/utilities/onboarding-form) as an incoming member which you can find instructions for [here](/docs/community-docs/watcloud#overview).
 
 ### Grammar and Style Checker
 
