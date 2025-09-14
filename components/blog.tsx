@@ -25,9 +25,10 @@ import { getPagesUnderRoute } from "nextra/context";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Picture from "./picture";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import Picture from "@/components/picture";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input";
 
 // Header and Index derived from https://github.com/vercel/turbo/blob/66196a70d02cddc8899ed1423684b1f716aa310e/docs/pages/blog.mdx
 export function BlogHeader() {
@@ -129,6 +130,19 @@ export function BlogIndex() {
                         <div className="hidden md:block ml-auto">{squareImageComponent}</div>
                     </div>
                 </Link>
+                <div className="mb-4">
+                    {frontMatter.tags && frontMatter.tags.length > 0 &&
+                    <div className="flex flex-wrap gap-1 items-center">
+                        {frontMatter.tags.map(
+                            (tag: String) => (<span key={tag.toString()}>
+                                <Link href={`/blog/tags/${tag}`} style={{ color: "inherit", textDecoration: "none" }}>
+                                    <Badge>{tag}</Badge>
+                                </Link>
+                            </span>)
+                        )}
+                    </div>
+                    }
+                </div>
             </div>
         );
     })
