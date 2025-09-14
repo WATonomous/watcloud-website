@@ -14,6 +14,7 @@ import React, { Fragment } from 'react';
 import { SubscribeDialog } from './blog';
 import Picture from './picture';
 import { SocialLinks } from './ui/social-links';
+import { Badge } from '@/components/ui/badge';
 
 // Reference for styling: https://github.com/vercel/turbo/blob/22585c9dcc23eb010ab01f177394358af03210d7/docs/pages/blog/turbo-1-10-0.mdx
 
@@ -61,7 +62,7 @@ export function Avatar({ username }: { username: string }) {
 export function BlogPostHeader() {
     const { frontMatter } = useConfig();
 
-    const { title, date, timezone, authors, reviewers } = frontMatter;
+    const { title, date, timezone, authors, reviewers, tags } = frontMatter;
     const { locale = websiteConfig.default_locale } = useRouter()
     const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
 
@@ -115,6 +116,17 @@ export function BlogPostHeader() {
                     })}
                 </time>
             </Date>
+            {tags && tags.length > 0 && (
+                <div className="text-center mt-4 mb-2">
+                    <div className="flex flex-wrap justify-center gap-3">
+                        {tags.map((tag: string) => (<span key={tag.toString()}>
+                            <Link href={`/blog/tags/${tag}`} style={{ color: "inherit", textDecoration: "none" }}>
+                                <Badge>{tag}</Badge>
+                            </Link>
+                        </span>))}
+                    </div>
+                </div>
+            )}
             <div className="w-full border-b border-gray-400 authors border-opacity-20">
                 <div className="flex justify-center mt-8 mb-2 mx-auto gap-14">
                     {authors && authors.length > 0 && (
