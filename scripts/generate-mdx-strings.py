@@ -87,7 +87,7 @@ def dump_mdx(strings: list[str], output_dir: str, overwrite: bool = False):
 @app.command()
 def json_to_mdx(json_file_paths: list[str], output_dir: str):
     strings = list(chain.from_iterable(get_all_strings(p) for p in json_file_paths))
-    dump_mdx(strings, output_dir)
+    dump_mdx(strings=strings, output_dir=output_dir)
 
 if __name__ == '__main__':
     app()
