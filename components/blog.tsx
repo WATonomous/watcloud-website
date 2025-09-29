@@ -44,110 +44,164 @@ export function BlogHeader() {
     );
 }
 
+export function TaggedBlogHeader({ tag }: { tag: string }) {
+    return (
+        <div className="max-w-screen-lg mx-auto pt-4 pb-8 border-b border-gray-400 border-opacity-20">
+            <h1>
+                <span className="font-bold leading-tight lg:text-5xl">Breadcrumbs</span>
+            </h1>
+            <p className="text-center text-gray-500 dark:text-gray-400 font-space-grotesk">
+                Posts tagged "{tag}"
+            </p>
+        </div>
+    );
+}
+
+export function getPostsCountForTag(tag: string): number {
+    const blogPosts = getPagesUnderRoute("/blog");
+    let count = 0;
+
+    blogPosts.forEach((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {};
+        if (frontMatter.hidden) {
+            return;
+        }
+
+        // Check if post has the specified tag
+        if (frontMatter.tags && frontMatter.tags.includes(tag)) {
+            // Check if post has title_image (to match BlogFilteredIndex filtering)
+            if (frontMatter.title_image) {
+                count++;
+            }
+        }
+    });
+
+    return count;
+}
+
+function processBlogPost(page: any, locale: string, filterTag?: string) {
+    const frontMatter = (page as MdxFile).frontMatter || {}
+    if (frontMatter.hidden) {
+        return null
+    }
+
+    // Filter by tag if specified
+    if (filterTag && (!frontMatter.tags || !frontMatter.tags.includes(filterTag))) {
+        return null
+    }
+
+    const { date, timezone } = frontMatter
+    const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
+
+    // Check if title_image exists before accessing its properties
+    if (!frontMatter.title_image) {
+        return null; // Skip posts without title images
+    }
+
+    const wideImageKey = frontMatter.title_image.wide;
+    const squareImageKey = frontMatter.title_image.square;
+
+    if (!wideImageKey || !squareImageKey) {
+        throw new Error(`Missing wide or square image key for title_image: ${JSON.stringify(frontMatter.title_image)}`);
+    }
+
+    // Enforce image existence
+    const wideImage = allImages[wideImageKey];
+    if (!wideImage) {
+        throw new Error(`Cannot find image with key: ${wideImageKey}`);
+    }
+    const squareImage = allImages[squareImageKey];
+    if (!squareImage) {
+        throw new Error(`Cannot find image with key: ${squareImageKey}`);
+    }
+
+    // Enforce aspect ratios
+    if (Math.abs(wideImage.jpg.width / wideImage.jpg.height - 7 / 4) > 1e-6) {
+        throw new Error(`Wide image ${wideImageKey} does not have aspect ratio 7:4 (width: ${wideImage.jpg.width}, height: ${wideImage.jpg.height})`);
+    }
+    if (squareImage.jpg.width !== squareImage.jpg.height) {
+        throw new Error(`Square image ${squareImageKey} does not have aspect ratio 1:1 (width: ${squareImage.jpg.width}, height: ${squareImage.jpg.height})`);
+    }
+
+    // Enforce attribution
+    const titleImageAttribution = frontMatter.title_image.attribution;
+    if (!titleImageAttribution) {
+        throw new Error(`No attribution found for title_image: ${JSON.stringify(frontMatter.title_image) }`);
+    }
+
+    const squareImageComponent = (
+        <Picture
+            image={squareImage}
+            alt={titleImageAttribution}
+            wrapperClassName='ml-4 block'
+            imgClassName='max-h-40 max-w-40 w-40 h-auto object-contain'
+        />
+    );
+    const wideImageComponent = (
+        <Picture
+            image={wideImage}
+            alt={titleImageAttribution}
+            wrapperClassName=''
+            imgClassName='h-auto object-contain'
+        />
+    );
+
+    return (
+        <div key={page.route}>
+            <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }}>
+                <div className="mb-4 md:hidden">{wideImageComponent}</div>
+                <div className="flex items-center">
+                    <div>
+                        <h2 className="block font-semibold text-2xl">{page.meta?.title || frontMatter.title || page.name}</h2>
+                        <p className="opacity-80" style={{ marginTop: ".5rem" }}>
+                            {frontMatter.description}{" "}
+                        </p>
+                        {dateObj ? (
+                            <p className="opacity-50 text-sm">
+                                {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
+                                <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
+                                    {dateObj.toLocaleDateString(locale, {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    })}
+                                </time>
+                            </p>
+                        ) : null}
+                    </div>
+                    <div className="hidden md:block ml-auto">{squareImageComponent}</div>
+                </div>
+            </Link>
+            <div className="mb-4">
+                {frontMatter.tags && frontMatter.tags.length > 0 &&
+                <div className="flex flex-wrap gap-1 items-center">
+                    {frontMatter.tags.map(
+                        (tag: String) => (<span key={tag.toString()}>
+                            <Link href={`/blog/tagged?tag=${tag}`} style={{ color: "inherit", textDecoration: "none" }}>
+                                <Badge>{tag}</Badge>
+                            </Link>
+                        </span>)
+                    )}
+                </div>
+                }
+            </div>
+        </div>
+    );
+}
+
 export function BlogIndex() {
     const { locale = websiteConfig.default_locale } = useRouter()
-
-    const items = getPagesUnderRoute("/blog").map((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {}
-        if (frontMatter.hidden) {
-            return null
-        }
-
-        const { date, timezone } = frontMatter
-        const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
-
-        const wideImageKey = frontMatter.title_image.wide;
-        const squareImageKey = frontMatter.title_image.square;
-
-        if (!wideImageKey || !squareImageKey) {
-            throw new Error(`Missing wide or square image key for title_image: ${JSON.stringify(frontMatter.title_image)}`);
-        }
-
-        // Enforce image existence
-        const wideImage = allImages[wideImageKey];
-        if (!wideImage) {
-            throw new Error(`Cannot find image with key: ${wideImageKey}`);
-        }
-        const squareImage = allImages[squareImageKey];
-        if (!squareImage) {
-            throw new Error(`Cannot find image with key: ${squareImageKey}`);
-        }
-
-        // Enforce aspect ratios
-        if (Math.abs(wideImage.jpg.width / wideImage.jpg.height - 7 / 4) > 1e-6) {
-            throw new Error(`Wide image ${wideImageKey} does not have aspect ratio 7:4 (width: ${wideImage.jpg.width}, height: ${wideImage.jpg.height})`);
-        }
-        if (squareImage.jpg.width !== squareImage.jpg.height) {
-            throw new Error(`Square image ${squareImageKey} does not have aspect ratio 1:1 (width: ${squareImage.jpg.width}, height: ${squareImage.jpg.height})`);
-        }
-
-        // Enforce attribution
-        const titleImageAttribution = frontMatter.title_image.attribution;
-        if (!titleImageAttribution) {
-            throw new Error(`No attribution found for title_image: ${JSON.stringify(frontMatter.title_image) }`);
-        }
-
-        const squareImageComponent = (
-            <Picture
-                image={squareImage}
-                alt={titleImageAttribution}
-                wrapperClassName='ml-4 block'
-                imgClassName='max-h-40 max-w-40 w-40 h-auto object-contain'
-            />
-        );
-        const wideImageComponent = (
-            <Picture
-                image={wideImage}
-                alt={titleImageAttribution}
-                wrapperClassName=''
-                imgClassName='h-auto object-contain'
-            />
-        );
-
-        return (
-            <div key={page.route}>
-                <Link href={page.route} style={{ color: "inherit", textDecoration: "none" }}>
-                    <div className="mb-4 md:hidden">{wideImageComponent}</div>
-                    <div className="flex items-center">
-                        <div>
-                            <h2 className="block font-semibold text-2xl">{page.meta?.title || frontMatter.title || page.name}</h2>
-                            <p className="opacity-80" style={{ marginTop: ".5rem" }}>
-                                {frontMatter.description}{" "}
-                            </p>
-                            {dateObj ? (
-                                <p className="opacity-50 text-sm">
-                                    {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
-                                    <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
-                                        {dateObj.toLocaleDateString(locale, {
-                                            day: 'numeric',
-                                            month: 'long',
-                                            year: 'numeric'
-                                        })}
-                                    </time>
-                                </p>
-                            ) : null}
-                        </div>
-                        <div className="hidden md:block ml-auto">{squareImageComponent}</div>
-                    </div>
-                </Link>
-                <div className="mb-4">
-                    {frontMatter.tags && frontMatter.tags.length > 0 &&
-                    <div className="flex flex-wrap gap-1 items-center">
-                        {frontMatter.tags.map(
-                            (tag: String) => (<span key={tag.toString()}>
-                                <Link href={`/blog/tags/${tag}`} style={{ color: "inherit", textDecoration: "none" }}>
-                                    <Badge>{tag}</Badge>
-                                </Link>
-                            </span>)
-                        )}
-                    </div>
-                    }
-                </div>
-            </div>
-        );
-    })
+    const items = getPagesUnderRoute("/blog").map((page) => processBlogPost(page, locale))
 
     return <div className="grid gap-y-10 my-16">{items}</div>
+}
+
+export function BlogFilteredIndex({ filterTag }: { filterTag: string }) {
+    const { locale = websiteConfig.default_locale } = useRouter()
+    const items = getPagesUnderRoute("/blog").map((page) => processBlogPost(page, locale, filterTag))
+    const filteredItems = items.filter(item => item !== null);
+
+    return <div className="grid gap-y-10 my-16">{filteredItems}</div>;
 }
 
 const subscribeFormSchema = z.object({

@@ -1,0 +1,75 @@
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import Head from 'next/head'
+import { TaggedBlogHeader, BlogFilteredIndex, SubscribeDialog, BlogHeader, BlogIndex, getPostsCountForTag } from '@/components/blog'
+
+export function TaggedBlogPage() {
+    const router = useRouter()
+    const [tag, setTag] = useState(null)
+
+    // All hooks must be called before any conditional returns
+    useEffect(() => {
+        if (!router.isReady) return
+
+        // Get tag from URL query parameter
+        const urlTag = router.query.tag
+        if (urlTag && typeof urlTag === 'string' && urlTag.trim() !== '') {
+            setTag(urlTag.trim())
+        } else {
+            // Fallback: parse from asPath for compatibility
+            const pathTag = router.asPath.split('?tag=')[1]?.split('&')[0]
+            if (pathTag && pathTag.trim() !== '') {
+                setTag(decodeURIComponent(pathTag).trim())
+            }
+        }
+    }, [router.isReady, router.query.tag, router.asPath])
+
+    // Redirect to main blog page if no tag specified or empty tag 
+    // (but only after router is ready and we've attempted to parse the tag)
+    useEffect(() => {
+        if (router.isReady && !tag &&
+            (!router.query.tag ||
+             (typeof router.query.tag === 'string' && router.query.tag.trim() === '') ||
+             !router.asPath.includes('?tag=') ||
+             router.asPath.includes('?tag=&') ||
+             router.asPath.endsWith('?tag='))) {
+            router.push('/blog')
+        }
+    }, [router.isReady, tag, router.query.tag, router.asPath, router])
+
+    // Redirect if tag has no posts
+    useEffect(() => {
+        if (router.isReady && tag && getPostsCountForTag(tag) === 0) {
+            router.push('/blog')
+        }
+    }, [router.isReady, tag, router])
+
+    // Conditional rendering after all hooks
+    if (tag) {
+        return (
+            <>
+                <Head>
+                    <title>Posts tagged "{tag}" - WATcloud</title>
+                    <meta name="description" content={`Blog posts tagged with "${tag}" from WATcloud`} />
+                </Head>
+                <TaggedBlogHeader tag={tag} />
+                <BlogFilteredIndex filterTag={tag} />
+                <SubscribeDialog />
+            </>
+        )
+    }
+
+    return (
+        <>
+            <Head>
+                <title>Tagged Posts - WATcloud</title>
+                <meta name="description" content="Loading tagged blog posts from WATcloud" />
+            </Head>
+            <div className="max-w-screen-lg mx-auto pt-4 pb-8">
+                <h1 className="font-bold leading-tight lg:text-5xl">Loading...</h1>
+            </div>
+        </>
+    )
+}
+
+<TaggedBlogPage />

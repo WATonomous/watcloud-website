@@ -120,7 +120,7 @@ export function BlogPostHeader() {
                 <div className="text-center mt-4 mb-2">
                     <div className="flex flex-wrap justify-center gap-3">
                         {tags.map((tag: string) => (<span key={tag.toString()}>
-                            <Link href={`/blog/tags/${tag}`} style={{ color: "inherit", textDecoration: "none" }}>
+                            <Link href={`/blog/tagged?tag=${tag}`} style={{ color: "inherit", textDecoration: "none" }}>
                                 <Badge>{tag}</Badge>
                             </Link>
                         </span>))}

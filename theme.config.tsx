@@ -120,7 +120,10 @@ const themeConfig = {
   },
   main: function Main({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const isBlogPost = router.pathname.startsWith("/blog/");
+    // Only apply blog post header/footer to individual blog posts, not blog index or tag pages
+    const isBlogPost = router.pathname.startsWith("/blog/") &&
+                      router.pathname !== "/blog" &&
+                      router.pathname !== "/blog/tagged";
 
     const header = isBlogPost && <BlogPostHeader />;
     const footer = isBlogPost && <><BlogPostFooter /><div className="mt-16"/></>;
