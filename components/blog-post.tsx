@@ -1,5 +1,6 @@
 import { allImages } from '@/build/fixtures/images';
 import CommentSection from '@/components/giscus-comments';
+import { Badge } from "@/components/ui/badge";
 import {
     Popover,
     PopoverContent,
@@ -115,6 +116,13 @@ export function BlogPostHeader() {
                     })}
                 </time>
             </Date>
+            {frontMatter.tags && frontMatter.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center mt-4">
+                    {frontMatter.tags.map((tag: string) => (
+                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                    ))}
+                </div>
+            )}
             <div className="w-full border-b border-gray-400 authors border-opacity-20">
                 <div className="flex justify-center mt-8 mb-2 mx-auto gap-14">
                     {authors && authors.length > 0 && (
