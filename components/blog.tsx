@@ -126,16 +126,16 @@ export function BlogIndex() {
                                     </time>
                                 </p>
                             ) : null}
+                            {frontMatter.tags && frontMatter.tags.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                {frontMatter.tags.map((tag: string) => (
+                                <Badge key={tag} variant="secondary">{tag}</Badge>
+                                ))}
+                            </div>
+                            )}
                         </div>
                         <div className="hidden md:block ml-auto">{squareImageComponent}</div>
                     </div>
-                    {frontMatter.tags && frontMatter.tags.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                        {frontMatter.tags.map((tag: string) => (
-                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                        ))}
-                    </div>
-                )}
                 </Link>
             </div>
         );
