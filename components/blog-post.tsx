@@ -119,7 +119,9 @@ export function BlogPostHeader() {
             {frontMatter.tags && frontMatter.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center mt-4">
                     {frontMatter.tags.map((tag: string) => (
-                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                        <Link href={`/blog?tag=${tag}`} key={tag} className="no-underline">
+                            <Badge variant="secondary">{tag}</Badge>
+                        </Link>
                     ))}
                 </div>
             )}

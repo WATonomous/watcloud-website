@@ -45,13 +45,28 @@ export function BlogHeader() {
 }
 
 export function BlogIndex() {
-    const { locale = websiteConfig.default_locale } = useRouter()
+    const router = useRouter();
+    const locale = router.locale || websiteConfig.default_locale;
+    const activeTag = router.query.tag as string | undefined;
 
-    const items = getPagesUnderRoute("/blog").map((page) => {
+    // Get all blog posts (excluding hidden ones)
+    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {};
+        if(frontMatter.hidden){return null}
+        return frontMatter;
+    });
+
+    // Filter posts by tag if a tag parameter is present
+    let filteredPosts = allPosts;
+    if (activeTag) {
+        filteredPosts = allPosts.filter((page) => {
+            const frontMatter = (page as MdxFile).frontMatter || {};
+            return frontMatter.tags && frontMatter.tags.includes(activeTag);
+        });
+    }
+        
+    const items = filteredPosts.map((page) => {
         const frontMatter = (page as MdxFile).frontMatter || {}
-        if (frontMatter.hidden) {
-            return null
-        }
 
         const { date, timezone } = frontMatter
         const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
@@ -127,11 +142,20 @@ export function BlogIndex() {
                                 </p>
                             ) : null}
                             {frontMatter.tags && frontMatter.tags.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                                {frontMatter.tags.map((tag: string) => (
-                                <Badge key={tag} variant="secondary">{tag}</Badge>
-                                ))}
-                            </div>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {frontMatter.tags.map((tag: string) => (
+                                        <Badge 
+                                            onClick={(e) => {
+                                                // Prevent redicretion to blog post
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                router.push(`/blog?tag=${tag}`);
+                                            }}
+                                        key={tag} variant="secondary">
+                                            {tag}
+                                        </Badge>
+                                    ))}
+                                </div>
                             )}
                         </div>
                         <div className="hidden md:block ml-auto">{squareImageComponent}</div>
@@ -141,7 +165,22 @@ export function BlogIndex() {
         );
     })
 
-    return <div className="grid gap-y-10 my-16">{items}</div>
+    return (
+        <div className="pt-8 pb-16">
+            {activeTag && (
+                <div className="flex items-center justify-between mb-8 py-2 px-4 bg-muted rounded-md">
+                    <div className="flex items-center gap-2">
+                        <span>Showing posts tagged: </span>
+                        <Badge variant="secondary">{activeTag}</Badge>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => router.push('/blog')}>
+                        Clear filter
+                    </Button>
+                </div>
+            )}
+            <div className="grid gap-y-10 pt-8">{items}</div>
+        </div>
+    )
 }
 
 const subscribeFormSchema = z.object({
