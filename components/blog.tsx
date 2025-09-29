@@ -168,7 +168,7 @@ export function BlogIndex() {
     return (
         <div className="pt-8 pb-16">
             {activeTag && (
-                <div className="flex items-center justify-between mb-8 py-2 px-4 bg-muted rounded-md">
+                <div className="flex items-center justify-between mb-8 py-2 px-4 bg-primary/10 dark:bg-primary/20 rounded-md">
                     <div className="flex items-center gap-2">
                         <span>Showing posts tagged: </span>
                         <Badge variant="secondary">{activeTag}</Badge>
@@ -178,7 +178,7 @@ export function BlogIndex() {
                     </Button>
                 </div>
             )}
-            <div className="grid gap-y-10 pt-8">{items}</div>
+            <div className="grid gap-y-10 pt-2">{items}</div>
         </div>
     )
 }
