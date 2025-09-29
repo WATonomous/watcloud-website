@@ -44,12 +44,6 @@ export function BlogHeader() {
     );
 }
 
-
-/**
- * Gets all visible blog posts and filters them by tag if specified
- * @param activeTag Optional tag to filter posts by
- * @returns Array of filtered blog posts
- */
 function getFilteredBlogPosts(activeTag?: string) {
     // Get all blog posts (excluding hidden ones)
     const allPosts = getPagesUnderRoute("/blog").filter((page) => {
@@ -74,8 +68,6 @@ export function BlogIndex() {
     const router = useRouter();
     const locale = router.locale || websiteConfig.default_locale;
     const activeTag = router.query.tag as string | undefined;
-
-    // Get filtered blog posts
     const filteredPosts = getFilteredBlogPosts(activeTag);
         
     const items = filteredPosts.map((page) => {
