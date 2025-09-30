@@ -10,6 +10,9 @@ from urllib.parse import urlparse, urljoin
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
 # CONFIG
 if len(sys.argv) < 2:
     print("Usage: python3 check_links.py <BASE_URL>")
@@ -19,6 +22,19 @@ BASE_URL = sys.argv[1]
 DEPLOYED_DOMAIN = "https://cloud.watonomous.ca/"  # Where the build is deployed
 
 fail_build = False
+
+# HTTP client configuration
+DEFAULT_TIMEOUT = 30
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=15,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=frozenset(["HEAD", "GET", "OPTIONS"])
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+session = requests.Session()
+session.mount("http://", adapter)
+session.mount("https://", adapter)
 
 def is_internal_url(url):
     """Check if a URL is internal to the website."""
@@ -56,7 +72,7 @@ def crawl_and_fetch_links(url):
     def crawl(url):
         """Recursively fetch links from the given URL, separating internal and external links."""
         try:
-            response = requests.get(url)
+            response = session.get(url, timeout=DEFAULT_TIMEOUT)
         except requests.RequestException as e:
             print(f"Request for {url} failed: {e}")
             global fail_build 
@@ -89,7 +105,7 @@ def get_response_code(full_url) -> int:
     url = parsed_url._replace(fragment='').geturl()
 
     try:
-        response = requests.get(url, timeout=15)
+        response = session.get(url, timeout=DEFAULT_TIMEOUT)
         return response.status_code  
     except requests.RequestException as e:
         print(f"Request for {url} failed: {e}")
@@ -99,7 +115,10 @@ def check_fragment_validity(full_url) -> bool:
     """Check if a fragment in a URL is valid."""
     parsed_url = urlparse(full_url)
     fragment = parsed_url.fragment 
-    response = requests.get(parsed_url._replace(fragment='').geturl())
+    try:
+        response = session.get(parsed_url._replace(fragment='').geturl(), timeout=DEFAULT_TIMEOUT)
+    except requests.RequestException:
+        return False
 
     # If there's a fragment, check if it corresponds to an id in the HTML
     soup = BeautifulSoup(response.text, 'html.parser')
