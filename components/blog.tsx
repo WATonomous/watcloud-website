@@ -44,32 +44,32 @@ export function BlogHeader() {
     );
 }
 
-function getFilteredBlogPosts(activeTag?: string) {
-    // Get all blog posts (excluding hidden ones)
-    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {};
-        if(frontMatter.hidden){return null}
-        return frontMatter;
-    });
-
-    // Filter posts by tag if a tag parameter is present
-    let filteredPosts = allPosts;
-    if (activeTag) {
-        filteredPosts = allPosts.filter((page) => {
-            const frontMatter = (page as MdxFile).frontMatter || {};
-            return frontMatter.tags && frontMatter.tags.includes(activeTag);
-        });
-    }
-    
-    return filteredPosts;
-}
-
 export function BlogIndex() {
     const router = useRouter();
     const locale = router.locale || websiteConfig.default_locale;
     const activeTag = router.query.tag as string | undefined;
-    const filteredPosts = getFilteredBlogPosts(activeTag);
-        
+    let tagCounts: Record<string, number> = {};
+
+    // Get all posts from route
+    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {};
+        // Get tag counts for the tag bar
+        if(frontMatter.tags && Array.isArray(frontMatter.tags)) {
+            frontMatter.tags.forEach((tag: string) => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+        }
+        if(frontMatter.hidden){return null}
+        return frontMatter;
+    });
+
+    // Filter blogs by tag
+    const filteredPosts = allPosts.filter((page) => {
+            const frontMatter = (page as MdxFile).frontMatter || {};
+            return !activeTag || frontMatter.tags && frontMatter.tags.includes(activeTag);
+    });
+    
+    // Get blog info
     const items = filteredPosts.map((page) => {
         const frontMatter = (page as MdxFile).frontMatter || {}
 
@@ -151,12 +151,13 @@ export function BlogIndex() {
                                     {frontMatter.tags.map((tag: string) => (
                                         <Badge 
                                             onClick={(e) => {
-                                                // Prevent redicretion to blog post
+                                                // Prevent redirection to blog post
                                                 e.preventDefault();
                                                 e.stopPropagation();
                                                 router.push(`/blog?tag=${tag}`);
                                             }}
-                                        key={tag} variant="secondary">
+                                            key={tag} 
+                                            variant={activeTag === tag ? "default" : "secondary"}>
                                             {tag}
                                         </Badge>
                                     ))}
@@ -170,20 +171,24 @@ export function BlogIndex() {
         );
     })
 
+    const tagBar = () => (
+        <div className="max-w-screen-lg mx-auto flex flex-wrap gap-x-2 gap-y-2 justify-center py-4 mb-6">
+            {Object.keys(tagCounts).sort().map((tag) => (
+                <Button 
+                    variant={activeTag === tag ? "default" : "secondary"}
+                    size="sm"
+                    key={tag}
+                    onClick={() => router.push(activeTag === tag ? '/blog' : `/blog?tag=${tag}`)}>
+                    {tag} <span className="pl-1 text-s">({tagCounts[tag]})</span>
+                </Button>
+            ))}
+        </div>
+    );
+
     return (
-        <div className="pt-8 pb-16">
-            {activeTag && (
-                <div className="flex items-center justify-between mb-8 py-2 px-4 bg-primary/10 dark:bg-primary/20 rounded-md">
-                    <div className="flex items-center gap-2">
-                        <span>Showing posts tagged: </span>
-                        <Badge variant="secondary">{activeTag}</Badge>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => router.push('/blog')}>
-                        Clear filter
-                    </Button>
-                </div>
-            )}
-            <div className="grid gap-y-10 pt-2">{items}</div>
+        <div className="pb-16">
+            {tagBar()}
+            <div className="grid gap-y-10">{items}</div>
         </div>
     )
 }
