@@ -92,7 +92,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "https-proxy-agent": "^7.0.6",
     "jest": "^29.7.0",
-    "p-limit": "^6.2.0",
+    "p-limit": "^7.1.1",
     "postcss": "^8.5.6",
     "quicktype": "^23.2.6",
     "sharp-cli": "^5.2.0",
