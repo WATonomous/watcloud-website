@@ -379,7 +379,7 @@ export default function OnboardingForm() {
       >
         <div className="mt-8 space-x-4">
           <Button type="submit">Submit</Button>
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">Advanced</Button>
             </DropdownMenuTrigger>
