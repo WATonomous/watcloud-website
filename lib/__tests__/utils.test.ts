@@ -125,13 +125,13 @@ describe('debounce', () => {
         const debouncedFn = debounce(mockFn, 1000);
 
         debouncedFn();
-        expect(mockFn).not.toBeCalled();
+        expect(mockFn).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(500);
-        expect(mockFn).not.toBeCalled();
+        expect(mockFn).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(500);
-        expect(mockFn).toBeCalledTimes(1);
+        expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
     it('should delay the function call when we call the function again', async () => {
@@ -139,19 +139,19 @@ describe('debounce', () => {
         const debouncedFn = debounce(mockFn, 1000);
 
         debouncedFn();
-        expect(mockFn).not.toBeCalled();
+        expect(mockFn).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(500);
-        expect(mockFn).not.toBeCalled();
+        expect(mockFn).not.toHaveBeenCalled();
 
         // This should reset the timer
         debouncedFn();
 
         jest.advanceTimersByTime(500);
-        expect(mockFn).not.toBeCalled();
+        expect(mockFn).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(500);
-        expect(mockFn).toBeCalledTimes(1);
+        expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
     it('should pass the correct arguments to the debounced function', async () => {
