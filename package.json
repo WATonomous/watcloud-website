@@ -81,7 +81,7 @@
     "@types/node": "20.8.7",
     "@types/react": "^18.3.25",
     "ajv-cli": "^5.0.0",
-    "ajv-formats": "^2.1.1",
+    "ajv-formats": "^3.0.1",
     "autoprefixer": "^10.4.21",
     "axios": "^1.12.2",
     "dedent": "^1.7.0",
