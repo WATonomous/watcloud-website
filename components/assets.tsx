@@ -21,8 +21,8 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 
-import '@uppy/core/dist/style.min.css';
-import '@uppy/dashboard/dist/style.min.css';
+import '@uppy/core/css/style.min.css';
+import '@uppy/dashboard/css/style.min.css';
 import { Textarea } from './ui/textarea';
 import { Separator } from "@/components/ui/separator";
 
