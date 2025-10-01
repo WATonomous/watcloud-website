@@ -79,7 +79,7 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.33",
     "@types/jest": "^30.0.0",
-    "@types/node": "20.8.7",
+    "@types/node": "24.6.0",
     "@types/react": "^18.3.25",
     "ajv-cli": "^5.0.0",
     "ajv-formats": "^3.0.1",
