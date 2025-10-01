@@ -182,7 +182,7 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
         setSelected(newOptions);
         onChange?.(newOptions);
       },
-      [selected]
+      [selected, onChange]
     );
 
     const handleKeyDown = React.useCallback(
@@ -200,7 +200,7 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
           }
         }
       },
-      [selected]
+      [selected, handleUnselect]
     );
 
     useEffect(() => {
@@ -230,7 +230,7 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       };
 
       void exec();
-    }, [debouncedSearchTerm, open]);
+    }, [debouncedSearchTerm, open, onSearch, groupBy, triggerSearchOnFocus]);
 
     const CreatableItem = () => {
       if (!creatable) return undefined;
