@@ -50,6 +50,19 @@ export function BlogIndex() {
     const activeTag = (router.query.tag as string | undefined)?.trim();
     let tagCounts: Record<string, number> = {};
 
+    // Get all posts from route
+    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {};
+        // Get tag counts for the tag bar
+        if (frontMatter.tags && Array.isArray(frontMatter.tags)) {
+            frontMatter.tags.forEach((tag: string) => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+        }
+        if (frontMatter.hidden) {return null}
+        return frontMatter;
+    });
+    
     // Redirect to main blog page if no tag specified or empty tag
     // (but only after router is ready and we've attempted to parse the tag)
     useEffect(() => {
@@ -66,18 +79,12 @@ export function BlogIndex() {
         } // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.isReady, activeTag, router.query.tag, router.asPath])
 
-    // Get all posts from route
-    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {};
-        // Get tag counts for the tag bar
-        if(frontMatter.tags && Array.isArray(frontMatter.tags)) {
-            frontMatter.tags.forEach((tag: string) => {
-                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-            });
-        }
-        if(frontMatter.hidden){return null}
-        return frontMatter;
-    });
+    // Redirect if tag has no posts
+    useEffect(() => {
+        if (router.isReady && activeTag && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
+            router.push('/blog')
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.isReady, activeTag])
 
     // Filter blogs by tag
     const filteredPosts = allPosts.filter((page) => {
