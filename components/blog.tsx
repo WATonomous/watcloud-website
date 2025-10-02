@@ -51,7 +51,7 @@ export function TaggedBlogHeader({ tag }: { tag: string }) {
                 <span className="font-bold leading-tight lg:text-5xl">Breadcrumbs</span>
             </h1>
             <p className="text-center text-gray-500 dark:text-gray-400 font-space-grotesk">
-                Posts tagged "{tag}"
+                Posts tagged &quot;{tag}&quot;
             </p>
         </div>
     );
