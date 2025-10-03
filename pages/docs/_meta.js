@@ -1,4 +1,4 @@
-{
+export default {
   "index": "Introduction",
   "services": "Services",
   "compute-cluster": "Compute Cluster",
