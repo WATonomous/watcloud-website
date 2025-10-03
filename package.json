@@ -13,7 +13,7 @@
     "lint": "next lint --max-warnings 0",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
-    "generate-fixtures": "./scripts/generate-fixtures.sh"
+    "generate-fixtures": "./create-minimal-fixtures.sh"
   },
   "repository": {
     "type": "git",
