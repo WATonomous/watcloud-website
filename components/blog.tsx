@@ -8,6 +8,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import {
     Form,
     FormControl,
@@ -22,7 +23,7 @@ import { useRouter } from 'next/router';
 import { MdxFile } from "nextra";
 import { Link } from "nextra-theme-docs";
 import { getPagesUnderRoute } from "nextra/context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Picture from "./picture";
@@ -44,13 +45,58 @@ export function BlogHeader() {
 }
 
 export function BlogIndex() {
-    const { locale = websiteConfig.default_locale } = useRouter()
+    const router = useRouter();
+    const locale = router.locale || websiteConfig.default_locale;
+    const activeTag = (router.query.tag as string | undefined)?.trim();
+    let tagCounts: Record<string, number> = {};
 
-    const items = getPagesUnderRoute("/blog").map((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {}
-        if (frontMatter.hidden) {
-            return null
+    // Get all posts from route
+    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {};
+        // Get tag counts for the tag bar
+        if (frontMatter.tags && Array.isArray(frontMatter.tags)) {
+            frontMatter.tags.forEach((tag: string) => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
         }
+        if (frontMatter.hidden) {return null}
+        return frontMatter;
+    });
+    
+    // Redirect to main blog page if no tag specified or empty tag
+    // (but only after router is ready and we've attempted to parse the tag)
+    useEffect(() => {
+        if (router.isReady && !activeTag &&
+            (
+                !router.query.tag ||
+                (typeof router.query.tag === 'string' && router.query.tag.trim() === '') ||
+                !router.asPath.includes('?tag=') ||
+                router.asPath.includes('?tag=&') ||
+                router.asPath.endsWith('?tag=')
+            )
+        ) {
+            router.push('/blog')
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.isReady, activeTag, router.query.tag, router.asPath])
+    // excluding router object from deps to prevent infinite loop (it changes on every navigation)
+
+    // Redirect if tag has no posts
+    useEffect(() => {
+        if (router.isReady && activeTag && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
+            router.push('/blog')
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.isReady, activeTag])
+    // excluding router object from deps to prevent infinite loop (it changes on every navigation)
+
+    // Filter blogs by tag
+    const filteredPosts = allPosts.filter((page) => {
+            const frontMatter = (page as MdxFile).frontMatter || {};
+            return !activeTag || frontMatter.tags && frontMatter.tags.includes(activeTag);
+    });
+    
+    // Get blog info
+    const items = filteredPosts.map((page) => {
+        const frontMatter = (page as MdxFile).frontMatter || {}
 
         const { date, timezone } = frontMatter
         const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
@@ -125,6 +171,23 @@ export function BlogIndex() {
                                     </time>
                                 </p>
                             ) : null}
+                            {frontMatter.tags && frontMatter.tags.length > 0 && (
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {frontMatter.tags.map((tag: string) => (
+                                        <Badge 
+                                            onClick={(e) => {
+                                                // Prevent redirection to blog post
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                router.push(`/blog?tag=${tag}`);
+                                            }}
+                                            key={tag} 
+                                            variant={activeTag === tag ? "default" : "secondary"}>
+                                            {tag}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="hidden md:block ml-auto">{squareImageComponent}</div>
                     </div>
@@ -133,7 +196,26 @@ export function BlogIndex() {
         );
     })
 
-    return <div className="grid gap-y-10 my-16">{items}</div>
+    const tagBar = () => (
+        <div className="max-w-screen-lg mx-auto flex flex-wrap gap-x-2 gap-y-2 justify-center py-4 mb-6">
+            {Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]).map((tag) => (
+                <Button 
+                    variant={activeTag === tag ? "default" : "secondary"}
+                    size="sm"
+                    key={tag}
+                    onClick={() => router.push(activeTag === tag ? '/blog' : `/blog?tag=${tag}`)}>
+                    {tag} <span className="pl-1 text-s">({tagCounts[tag]})</span>
+                </Button>
+            ))}
+        </div>
+    );
+
+    return (
+        <div className="pb-16">
+            {tagBar()}
+            <div className="grid gap-y-10">{items}</div>
+        </div>
+    )
 }
 
 const subscribeFormSchema = z.object({
