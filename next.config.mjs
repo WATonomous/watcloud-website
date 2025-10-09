@@ -1,5 +1,19 @@
-// Original Next.js config
-module.exports = {
+import nextra from 'nextra';
+import { withSentryConfig } from '@sentry/nextjs';
+import withBundleAnalyzerFactory from '@next/bundle-analyzer';
+
+// Add Nextra config
+const withNextra = nextra({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.tsx',
+  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
+});
+
+const withBundleAnalyzer = withBundleAnalyzerFactory({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const base = {
   reactStrictMode: true,
   output: 'export',
   images: {
@@ -8,11 +22,11 @@ module.exports = {
   },
   // Next.js doesn't support trailing slashes in basePath
   // This config needs to be in sync with export-images.config.js
-  basePath: (process.env.WEBSITE_BASE_PATH || '').replace(/\/$/, ""),
+  basePath: (process.env.WEBSITE_BASE_PATH || '').replace(/\/$/, ''),
   webpack: (config) => {
     // Add Typescript support
     // Reference: https://www.altogic.com/blog/nextjs-typescript
-    config.resolve.extensions.push(".ts", ".tsx");
+    config.resolve.extensions.push('.ts', '.tsx');
     return config;
   },
   eslint: {
@@ -23,27 +37,19 @@ module.exports = {
       'components',
       'lib',
       'theme.config.tsx',
-      "tailwind.config.js",
-      "next.config.js",
-      "postcss.config.js",
-    ]
-  }
-}
+      'tailwind.config.js',
+      'next.config.js',
+      'postcss.config.js',
+    ],
+  },
+};
 
-// Add Nextra config
-const withNextra = require('nextra')({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-  latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
-});
-  
-module.exports = withNextra(module.exports)
+// Wrap with Nextra first
+let config = withNextra(base);
 
-// Add Sentry config
-const { withSentryConfig } = require("@sentry/nextjs");
-
-module.exports = withSentryConfig(
-  module.exports,
+// Add Sentry config if available
+config = withSentryConfig(
+  config,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
@@ -77,9 +83,7 @@ module.exports = withSentryConfig(
   }
 );
 
-// Add bundle analyzer config
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.ANALYZE === "true",
-});
+// Add bundle analyzer
+config = withBundleAnalyzer(config);
 
-module.exports = withBundleAnalyzer(module.exports);
+export default config;

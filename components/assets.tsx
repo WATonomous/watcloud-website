@@ -158,21 +158,21 @@ export function AssetInspector() {
                     <div key={res.uri}>
                         {i !== 0 && (<Separator className="my-6" />)}
                         <span className="text-sm text-gray-500">URI</span>
-                        <Pre hasCopyCode className="-mt-5"><Code>{res.uri}</Code></Pre>
+                        <Pre  className="-mt-5"><Code>{res.uri}</Code></Pre>
                         {'result' in res && (
                             <>
                                 <span className="text-sm text-gray-500">Resolved</span>
-                                <Pre hasCopyCode className="-mt-5"><Code>{res.result.url}</Code></Pre>
+                                <Pre className="-mt-5"><Code>{res.result.url}</Code></Pre>
                                 {res.result.lastModified && (
                                     <>
                                         <span className="text-sm text-gray-500 block">Last Modified</span>
-                                        <Pre hasCopyCode className="-mt-5"><Code>{dayjs().to(res.result.lastModified)} ({res.result.lastModified.toISOString()})</Code></Pre>
+                                        <Pre className="-mt-5"><Code>{dayjs().to(res.result.lastModified)} ({res.result.lastModified.toISOString()})</Code></Pre>
                                     </>
 
                                 )}
                                 <>
                                     <span className="text-sm text-gray-500 block">Expires</span>
-                                    <Pre hasCopyCode className="-mt-5"><Code>{
+                                    <Pre className="-mt-5"><Code>{
                                         res.result.expiresAt ? 
                                             `${dayjs().to(res.result.expiresAt)} (${res.result.expiresAt.toISOString()})` :
                                             'Never'
@@ -181,7 +181,7 @@ export function AssetInspector() {
                                 {res.result.headers && (
                                     <>
                                         <span className="text-sm text-gray-500 block">Raw Headers</span>
-                                        <Pre hasCopyCode className="-mt-5"><Code>{JSON.stringify(Object.fromEntries(res.result.headers), null, 2)}</Code></Pre>
+                                        <Pre className="-mt-5"><Code>{JSON.stringify(Object.fromEntries(res.result.headers), null, 2)}</Code></Pre>
                                     </>
                                 )}
                             </>
@@ -285,7 +285,7 @@ export function AssetUploader() {
         {successfulUploads.map(({name, uri}) => (
             <div key={uri}>
                 <span className="text-sm text-gray-500">{name}</span>
-                <Pre hasCopyCode className="-mt-5"><Code>{uri}</Code></Pre>
+                <Pre className="-mt-5"><Code>{uri}</Code></Pre>
             </div>
         ))}
         {successfulUploads.length === 0 && (

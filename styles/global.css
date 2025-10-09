@@ -46,7 +46,7 @@
     https://github.com/shadcn-ui/ui/issues/313#issuecomment-1676513456
   */
   .dark, :root[class~="dark"] {
-    --background: 222.2 84% 4.9%;
+    --background: 0, 0%, 6.67%
     --foreground: 210 40% 98%;
  
     --card: 222.2 84% 4.9%;
@@ -99,7 +99,7 @@
   z-index: 1020; 
 } 
 
-.form-description p.nx-leading-7 {
+.form-description p._leading-7 {
   /* Change the styling of generated MDX content that are embedded in forms */
   line-height: 1.375;
 }
@@ -126,10 +126,10 @@ textarea {
 
 
 /* Fix margin issue for nested lists: https://github.com/shuding/nextra/issues/863#issuecomment-2068517369 */
-div > ul.first\:nx-mt-0:first-of-type,
-div > ol.first\:nx-mt-0:first-of-type,
-li > ul.first\:nx-mt-0:first-of-type,
-li > ol.first\:nx-mt-0:first-of-type {
+div > ul.first\:_mt-0:first-of-type,
+div > ol.first\:_mt-0:first-of-type,
+li > ul.first\:_mt-0:first-of-type,
+li > ol.first\:_mt-0:first-of-type {
   margin-top: 0;
 }
 

@@ -220,7 +220,7 @@ export default function OnboardingForm() {
     setAlertDescription("Below is the raw data from the form. You can send this to the WATcloud team for debugging purposes.");
     setAlertBody(
       <>
-        <Pre hasCopyCode>
+        <Pre>
           <Code>
             {JSON.stringify(postprocessFormData(formData), null, 2)}
           </Code>
@@ -237,7 +237,7 @@ export default function OnboardingForm() {
     const editLink = `${window.location.origin}${window.location.pathname}?${INITIAL_FORM_DATA_QUERY_PARAM}=${b64EncodeURI(JSON.stringify(postprocessFormData(formData)))}`;
     setAlertBody(
       <>
-        <Pre hasCopyCode>
+        <Pre>
           <Code>
             {editLink}
           </Code>
@@ -328,7 +328,7 @@ export default function OnboardingForm() {
               Successfully submitted registration request for <Code>{slug}</Code>! We will review your request and get back to you shortly.
               Your request ID is:
             </p>
-            <Pre hasCopyCode>
+            <Pre>
               <Code>
                 {requestID}
               </Code>

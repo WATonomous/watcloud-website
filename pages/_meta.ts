@@ -1,4 +1,4 @@
-{
+export default {
   "index": {
     "title": "Welcome",
     "type": "page",
@@ -38,4 +38,4 @@
   "onboarding-form": {
     "display": "hidden"
   }
-}
+};

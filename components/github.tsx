@@ -217,7 +217,7 @@ export function UsernameToID() {
             {globalNodeID && (
                 <div className="mt-8">
                     <h2 className="text-xl font-bold">Global Node ID</h2>
-                    <Pre hasCopyCode><Code>{globalNodeID}</Code></Pre>
+                    <Pre><Code>{globalNodeID}</Code></Pre>
                 </div>
             )}
             {rawData && (
@@ -228,7 +228,7 @@ export function UsernameToID() {
                         <Details>
                             <Summary>Raw data</Summary>
                             <div className="mt-2">
-                                <Pre hasCopyCode><Code>{JSON.stringify(rawData, null, 2)}</Code></Pre>
+                                <Pre><Code>{JSON.stringify(rawData, null, 2)}</Code></Pre>
                             </div>
                         </Details>
                     </div>
