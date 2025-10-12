@@ -16,7 +16,8 @@ function PageIndex({
         {
             pages.map((page, i) => {
                 // Skip directories with no index page
-                if (page.kind !== "MdxPage") return null;
+                // In Nextra v3, Page doesn't expose a `kind` field; use presence of `frontMatter` to detect MDX pages
+                if (!('frontMatter' in page)) return null;
 
                 const title = page.meta?.title || page.name;
                 const route = page.route;

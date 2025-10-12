@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Input } from "./ui/input";
-import { useMDXComponents } from "nextra-theme-docs";
+import { useMDXComponents } from "nextra/mdx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Link } from "nextra-theme-docs"

@@ -1,5 +1,6 @@
 import Uppy from '@uppy/core';
-import type { UppyFile, SuccessResponse } from '@uppy/core'
+import type { UppyFile, Meta, Body as UppyBody } from '@uppy/core'
+import SuccessResponse from '@uppy/core'
 import { Dashboard } from '@uppy/react';
 import AwsS3 from '@uppy/aws-s3';
 import { useEffect, useState } from 'react';
@@ -242,21 +243,30 @@ export function AssetUploader() {
         function handleUpload() {
             setErrorMessages([]);
         }
-        async function handleUploadSuccess(file: UppyFile | undefined, response: SuccessResponse) {
-            if (!file) {
-                console.warn('Got upload success event without a file:', response)
-                return;
-            }
-            const hash = sha256Cache.get(file.id) || sha256(await file.data.arrayBuffer());
-            const watcloudURI = `watcloud://v1/sha256:${hash}?name=${encodeURIComponent(file.name)}`;
+    async function handleUploadSuccess(
+        file: UppyFile<Meta, UppyBody> | undefined,
+        response: { body?: Record<string, never>; status: number; bytesUploaded?: number; uploadURL?: string }
+    ) {
+        if (!file) {
+            console.warn('Got upload success event without a file:', response)
+            return;
+        }
+        // Since this function can't be async, use then/catch for async operations
+        const getHash = sha256Cache.get(file.id)
+            ? Promise.resolve(sha256Cache.get(file.id) as string)
+            : file.data.arrayBuffer().then((buf) => sha256(buf));
+        getHash.then((hash) => {
+            const fileName = file.name ?? 'unnamed';
+            const watcloudURI = `watcloud://v1/sha256:${hash}?name=${encodeURIComponent(fileName)}`;
             console.log('Uploaded file:', file, 'Response:', response, 'watcloud URI:', watcloudURI);
 
             setSuccessfulUploads((prev) => [{
-                name: file.name,
+                name: fileName,
                 uri: watcloudURI,
             }, ...prev]);
-        }
-        function handleUppyError(file: UppyFile | undefined, error: any) {
+        });
+    }
+    function handleUppyError(file: UppyFile<Meta, UppyBody> | undefined, error: any) {
             console.error('Failed upload:', file, "Error:", error, "Response status:", error.source?.status);
             setErrorMessages((prev) => [`Failed to upload ${file?.name}: "${error.message}", response status: "${error.source?.status}", response body: "${error.source?.responseText}"`, ...prev]);
         }
@@ -279,7 +289,7 @@ export function AssetUploader() {
             note={`Maximum file size: ${bytesToSize(UPLOADER_MAX_FILE_SIZE, 0)}`}
             width="100%"
             theme={uppyTheme}
-            showProgressDetails={true}
+            hideProgressDetails={false}
         />
         <h4 className="mt-8 mb-4 text-md">Successful Uploads</h4>
         {successfulUploads.map(({name, uri}) => (
