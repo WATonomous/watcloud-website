@@ -1,4 +1,4 @@
-export default {
+const metaConfig =  {
     "overview": {
         "display": "hidden"
     },
@@ -14,4 +14,6 @@ export default {
     },
     "quotas": "Quotas",
     "support-resources": "Support Resources"
-}
+};
+
+export default metaConfig;

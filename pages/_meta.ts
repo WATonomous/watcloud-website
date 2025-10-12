@@ -1,4 +1,4 @@
-export default {
+const metaConfig = {
   "index": {
     "title": "Welcome",
     "type": "page",
@@ -39,3 +39,5 @@ export default {
     "display": "hidden"
   }
 };
+
+export default metaConfig;

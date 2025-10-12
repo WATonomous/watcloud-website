@@ -63,7 +63,7 @@ const themeConfig = {
     ),
     link: `https://discord.gg/${websiteConfig.discord_invite_code}`
   },
-  head() {
+  head: function Head() {
     const { frontMatter } = useConfig();  
 
     return (

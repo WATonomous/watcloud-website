@@ -1,3 +1,5 @@
-export default {
+const metaConfig =  {
     "watcloud": "WATcloud"
-}
+};
+
+export default metaConfig;

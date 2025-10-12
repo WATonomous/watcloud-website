@@ -1,4 +1,4 @@
-export default {
+const metaConfig =  {
     "*": {
         "display": "hidden",
         "theme": {
@@ -9,3 +9,5 @@ export default {
         }
     }
 };
+
+export default metaConfig;
