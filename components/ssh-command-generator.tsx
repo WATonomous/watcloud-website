@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { Pre, Code } from 'nextra/components'
 import stripIndent from 'strip-indent';
@@ -25,8 +25,20 @@ export function SSHCommandGenerator() {
     const machineNames = Object.keys(sshInfo) as (keyof typeof sshInfo)[]
 
     const [_machineName, setMachineName] = useState<keyof typeof sshInfo | "">("")
-    const [username, _setUsername] = useState("")
-    const [sshKeyPath, _setSSHKeyPath] = useState("")
+    const [username, _setUsername] = useState(() => {
+        // Initialize from localStorage on first render
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem("wato_ssh_command_generator_username") || ""
+        }
+        return ""
+    })
+    const [sshKeyPath, _setSSHKeyPath] = useState(() => {
+        // Initialize from localStorage on first render
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem("wato_ssh_command_generator_ssh_key_path") || ""
+        }
+        return ""
+    })
 
     const machineName: keyof typeof sshInfo =
       _machineName ||
@@ -48,25 +60,6 @@ export function SSHCommandGenerator() {
     function setSSHKeyPathEvt(e: React.ChangeEvent<HTMLInputElement>) {
         setSSHKeyPath(e.target.value)
     }
-
-    // Attempt to populate fields from local storage. This is useful for users who have
-    // previously used the SSH command generator.
-    // We pass an empty dependency array to useEffect to ensure that this code is only run once
-    // at startup
-    useEffect(() => {
-        if (!username) {
-            const storedUsername = localStorage.getItem("wato_ssh_command_generator_username")
-            if (storedUsername) {
-                setUsername(storedUsername)
-            }
-        }
-        if (!sshKeyPath) {
-            const storedSSHKeyPath = localStorage.getItem("wato_ssh_command_generator_ssh_key_path")
-            if (storedSSHKeyPath) {
-                setSSHKeyPath(storedSSHKeyPath)
-            }
-        }
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const displayUsername = (username || htmlEncode("<username>")).replace(/\$$/, "\\$")
     const displaySSHKeyPath = sshKeyPath || htmlEncode("<ssh_key_path>")

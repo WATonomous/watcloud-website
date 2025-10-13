@@ -23,7 +23,7 @@ import { useRouter } from 'next/router';
 import { MdxFile } from "nextra";
 import { Link } from "nextra-theme-docs";
 import { getPagesUnderRoute } from "nextra/context";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Picture from "./picture";
@@ -48,20 +48,23 @@ export function BlogIndex() {
     const router = useRouter();
     const locale = router.locale || websiteConfig.default_locale;
     const activeTag = (router.query.tag as string | undefined)?.trim();
-    let tagCounts: Record<string, number> = {};
 
-    // Get all posts from route
-    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {};
-        // Get tag counts for the tag bar
-        if (frontMatter.tags && Array.isArray(frontMatter.tags)) {
-            frontMatter.tags.forEach((tag: string) => {
-                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-            });
-        }
-        if (frontMatter.hidden) {return null}
-        return frontMatter;
-    });
+    // Get all posts from route and calculate tag counts
+    const { allPosts, tagCounts } = useMemo(() => {
+        const tagCounts: Record<string, number> = {};
+        const allPosts = getPagesUnderRoute("/blog").filter((page) => {
+            const frontMatter = (page as MdxFile).frontMatter || {};
+            // Get tag counts for the tag bar
+            if (frontMatter.tags && Array.isArray(frontMatter.tags)) {
+                frontMatter.tags.forEach((tag: string) => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                });
+            }
+            if (frontMatter.hidden) {return null}
+            return frontMatter;
+        });
+        return { allPosts, tagCounts };
+    }, []);
     
     // Redirect to main blog page if no tag specified or empty tag
     // (but only after router is ready and we've attempted to parse the tag)
@@ -76,17 +79,15 @@ export function BlogIndex() {
             )
         ) {
             router.push('/blog')
-        } // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.isReady, activeTag, router.query.tag, router.asPath])
-    // excluding router object from deps to prevent infinite loop (it changes on every navigation)
+        }
+    }, [router, activeTag])
 
     // Redirect if tag has no posts
     useEffect(() => {
         if (router.isReady && activeTag && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
             router.push('/blog')
-        } // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.isReady, activeTag])
-    // excluding router object from deps to prevent infinite loop (it changes on every navigation)
+        }
+    }, [router, activeTag, tagCounts])
 
     // Filter blogs by tag
     const filteredPosts = allPosts.filter((page) => {
