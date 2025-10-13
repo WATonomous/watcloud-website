@@ -7,6 +7,14 @@ const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
   latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
+  mdxOptions: {
+    rehypePrettyCodeOptions: {
+          theme: {
+        dark: 'github-dark',
+        light: 'github-light'
+      }
+    },
+  },
 });
 
 const withBundleAnalyzer = withBundleAnalyzerFactory({
@@ -56,7 +64,7 @@ config = withSentryConfig(
 
     // Suppresses source map uploading logs during build
     silent: false,
-    
+
     // These variables are set in CI to enable source map uploading
     org: process.env.WATCLOUD_WEBSITE_SENTRY_ORG,
     project: process.env.WATCLOUD_WEBSITE_SENTRY_PROJECT,
