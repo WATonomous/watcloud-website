@@ -72,15 +72,6 @@ export function ComboBox({
                                     }
                                     setOpen(false)
                                 }}
-                                onPointerDown={(e) => {
-                                    e.preventDefault();
-                                    if (allowDeselect && entry.value === value) {
-                                        setValue("");
-                                    } else if (entry.value !== value) {
-                                        setValue(entry.value);
-                                    }
-                                    setOpen(false);
-                                }}
                             >
                                 <Check
                                     className={cn(
