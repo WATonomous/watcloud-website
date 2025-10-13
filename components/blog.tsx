@@ -23,7 +23,7 @@ import { useRouter } from 'next/router';
 import { MdxFile } from "nextra";
 import { Link } from "nextra-theme-docs";
 import { getPagesUnderRoute } from "nextra/context";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Picture from "./picture";
@@ -48,6 +48,9 @@ export function BlogIndex() {
     const router = useRouter();
     const locale = router.locale || websiteConfig.default_locale;
     const activeTag = (router.query.tag as string | undefined)?.trim();
+    const hasRedirectedEmptyTag = useRef(false);
+    const hasRedirectedInvalidTag = useRef(false);
+    const lastActiveTag = useRef(activeTag);
 
     // Get all posts from route and calculate tag counts
     const { allPosts, tagCounts } = useMemo(() => {
@@ -69,7 +72,14 @@ export function BlogIndex() {
     // Redirect to main blog page if no tag specified or empty tag
     // (but only after router is ready and we've attempted to parse the tag)
     useEffect(() => {
+        // Reset redirect flag when activeTag changes
+        if (activeTag !== lastActiveTag.current) {
+            hasRedirectedEmptyTag.current = false;
+            lastActiveTag.current = activeTag;
+        }
+
         if (router.isReady && !activeTag &&
+            !hasRedirectedEmptyTag.current &&
             (
                 !router.query.tag ||
                 (typeof router.query.tag === 'string' && router.query.tag.trim() === '') ||
@@ -78,14 +88,21 @@ export function BlogIndex() {
                 router.asPath.endsWith('?tag=')
             )
         ) {
-            router.push('/blog')
+            hasRedirectedEmptyTag.current = true;
+            router.push('/blog');
         }
     }, [router, activeTag])
 
     // Redirect if tag has no posts
     useEffect(() => {
-        if (router.isReady && activeTag && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
-            router.push('/blog')
+        // Reset redirect flag when activeTag changes to a valid tag
+        if (activeTag && tagCounts[activeTag] && tagCounts[activeTag] > 0) {
+            hasRedirectedInvalidTag.current = false;
+        }
+
+        if (router.isReady && activeTag && !hasRedirectedInvalidTag.current && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
+            hasRedirectedInvalidTag.current = true;
+            router.push('/blog');
         }
     }, [router, activeTag, tagCounts])
 
