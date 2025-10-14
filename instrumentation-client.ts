@@ -12,7 +12,7 @@ if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn: websiteConfig.sentry_dsn,
 
-    tracesSampler({ location }) {
+    tracesSampler({ location }: { location?: { host: string } }) {
       // Not sure what traces don't have a location, but sample them just in case.
       if (!location) {
         return TRACES_SAMPLE_RATE;
@@ -40,12 +40,11 @@ if (process.env.NODE_ENV === 'production') {
 
     tunnel: websiteConfig.sentry_tunnel,
 
-    integrations: [],
+    integrations: [
+      Sentry.replayIntegration(),
+    ],
   });
-
-  // Lazy-load the Sentry Replay integration
-  // https://docs.sentry.io/platforms/javascript/session-replay/#lazy-loading-replay
-  import('@sentry/browser').then(({ Replay }) => {
-    Sentry.addIntegration(new Replay());
-  })
 }
+
+// Export the required hook for navigation instrumentation
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

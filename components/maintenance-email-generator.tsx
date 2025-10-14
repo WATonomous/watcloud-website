@@ -314,13 +314,13 @@ export default function MaintenanceEmailGenerator() {
 
       </form>
       <h2 className="text-xl font-semibold mt-8 mb-2">Email (Plain Text)</h2>
-      <Pre hasCopyCode>
+      <Pre>
         <Code>
           {startTimeError ? "Please enter a valid future start time to generate the email." : plainTextEmail}
         </Code>
       </Pre>
       <h2 className="text-xl font-semibold mt-8 mb-2">Discord (Markdown)</h2>
-      <Pre hasCopyCode>
+      <Pre>
         <Code>
           {startTimeError ? "Please enter a valid future start time to generate the Discord message." : markdownDiscord}
         </Code>

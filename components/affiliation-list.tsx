@@ -26,7 +26,7 @@ export function AffiliationList({
               .map((a) => (
                 <CommandItem
                   key={a.name}
-                  className="aria-selected:bg-inherit aria-selected:text-accent-inherit"
+                  className="aria-[selected=true]:bg-inherit aria-[selected=true]:text-accent-inherit"
                 >
                   {a.name}
                 </CommandItem>
@@ -38,7 +38,7 @@ export function AffiliationList({
               .filter((a) => a.is_legacy)
               .map((a) => (
                 <CommandItem
-                  className="aria-selected:bg-inherit aria-selected:text-accent-inherit"
+                  className="aria-[selected=true]:bg-inherit aria-[selected=true]:text-accent-inherit"
                   key={a.name}
                 >
                   {a.name}
