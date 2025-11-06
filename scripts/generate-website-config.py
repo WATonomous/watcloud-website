@@ -15,7 +15,7 @@ def generate_fixtures(outputs_path):
     return {
         "discord_invite_code": discord_outputs["watcloud_website_invite_code"],
         # Obtained from https://healthchecks.io/projects/7acc2ad3-f672-40c9-a061-12c8fd128f8b/settings/
-        "healthchecksio_read_key": "tCsst0GSKpfvslmpmlsmivRrUCRuv6Iv",
+        "healthchecksio_read_key": "hcr_RNvMq5zwrGcvXurloN5mF9ino3qs",
         "sentry_dsn": sentry_outputs["watcloud-website-dsn"],
         # Obtained from https://analytics.google.com/analytics/web/#/p405574179/reports/intelligenthome
         "ga_measurement_id": "G-F19HMC41TD",
