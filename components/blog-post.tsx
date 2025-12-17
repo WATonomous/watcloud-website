@@ -9,6 +9,7 @@ import {
 import { userProfiles, websiteConfig } from '@/lib/data';
 import { dayjsTz } from '@/lib/utils';
 import { GithubIcon, LinkIcon, LinkedinIcon, MailIcon, XIcon } from 'lucide-react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Link, useConfig } from "nextra-theme-docs";
 import React, { Fragment } from 'react';
@@ -61,19 +62,63 @@ export function Avatar({ username }: { username: string }) {
 
 export function BlogPostHeader() {
     const { frontMatter } = useConfig();
+    const router = useRouter();
 
-    const { title, date, timezone, authors, reviewers } = frontMatter;
-    const { locale = websiteConfig.default_locale } = useRouter()
+    const { title, date, timezone, authors, reviewers, description } = frontMatter;
+    const { locale = websiteConfig.default_locale } = router
     const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
 
-    let titleImageComponent;
+    // Get the base URL dynamically from the current origin
+    // Fallback to a default for SSR/static generation
+    const getBaseUrl = () => {
+        if (typeof window !== 'undefined') {
+            return window.location.origin;
+        }
+        // Fallback for SSR/static generation - can be overridden via env var
+        return process.env.NEXT_PUBLIC_BASE_URL || 'https://cloud.watonomous.ca';
+    };
+    
+    const baseUrl = getBaseUrl();
+    const basePath = router.basePath || '';
+
+    // Get title image for Open Graph
+    let titleImage: typeof allImages[string] | undefined;
+    let ogImageUrl: string | undefined;
     if (frontMatter.title_image) {
         // prefer wide image, fallback to square
         const titleImageKey = frontMatter.title_image.wide || frontMatter.title_image.square;
-        const titleImage = allImages[titleImageKey];
+        titleImage = allImages[titleImageKey];
         if (!titleImage) {
             throw new Error(`Cannot find image with key: ${titleImageKey}`);
         }
+        
+        // Construct absolute URL for Open Graph image
+        // Use the JPG version for maximum compatibility
+        const imagePath = titleImage.jpg.src;
+        
+        // Extract just the /_next/... portion from the image path, ignoring any deployment preview paths
+        let normalizedImagePath: string;
+        if (imagePath.startsWith('http')) {
+            ogImageUrl = imagePath;
+        } else {
+            // Find the /_next/ part in the path and extract everything from there
+            const nextIndex = imagePath.indexOf('/_next/');
+            if (nextIndex !== -1) {
+                // Extract from /_next/ onwards
+                normalizedImagePath = imagePath.substring(nextIndex);
+            } else {
+                // Fallback: use the path as-is if /_next/ not found
+                normalizedImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+            }
+            ogImageUrl = `${baseUrl}${normalizedImagePath}`;
+        }
+    }
+
+    // Construct absolute URL for the current page
+    const pageUrl = `${baseUrl}${basePath}${router.asPath}`;
+
+    let titleImageComponent;
+    if (frontMatter.title_image && titleImage) {
         const titleImageAttribution = frontMatter.title_image.attribution;
         if (!titleImageAttribution) {
             throw new Error(`No attribution found for title_image: ${JSON.stringify(frontMatter.title_image)}`);
@@ -104,18 +149,35 @@ export function BlogPostHeader() {
 
     return (
         <>
+            <Head>
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="article" />
+                <meta property="og:title" content={title} />
+                <meta property="og:site_name" content="WATcloud" />
+                {description && <meta property="og:description" content={description} />}
+                {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+                <meta property="og:url" content={pageUrl} />
+                
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={title} />
+                {description && <meta name="twitter:description" content={description} />}
+                {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+            </Head>
             {titleImageComponent}
             <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
-            <Date>
-                {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
-                <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
-                    {dateObj.toLocaleDateString(locale, {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    })}
-                </time>
-            </Date>
+            {dateObj && (
+                <Date>
+                    {/* suppressHydrationWarning is used to prevent warnings due to differing server/client locales */}
+                    <time dateTime={dateObj.toISOString()} suppressHydrationWarning>
+                        {dateObj.toLocaleDateString(locale, {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        })}
+                    </time>
+                </Date>
+            )}
             {frontMatter.tags && frontMatter.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center mt-4">
                     {frontMatter.tags.map((tag: string) => (
