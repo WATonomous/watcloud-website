@@ -18,13 +18,13 @@ import {
   HelpCircleIcon,
   ServerIcon,
 } from "lucide-react"
-import { Card, Cards } from 'nextra/components'
+import { Cards } from 'nextra/components'
 
 <Cards>
-  <Card icon={<CpuIcon />} title="Machine List" href="/machines" />
-  <Card icon={<BookMarkedIcon />} title="User Manual" href="./compute-cluster/user-manual" />
-  <Card icon={<CheckSquareIcon />} title="Getting Access" href="./compute-cluster/getting-access" />
-  <Card icon={<TerminalIcon />} title="SSH Guide" href="./compute-cluster/ssh" />
-  <Card icon={<ServerIcon />} title="SLURM Guide" href="./compute-cluster/slurm" />
-  <Card icon={<HelpCircleIcon />} title="Support Resources" href="./compute-cluster/support-resources" />
+  <Cards.Card icon={<CpuIcon />} title="Machine List" href="/machines" />
+  <Cards.Card icon={<BookMarkedIcon />} title="User Manual" href="./compute-cluster/user-manual" />
+  <Cards.Card icon={<CheckSquareIcon />} title="Getting Access" href="./compute-cluster/getting-access" />
+  <Cards.Card icon={<TerminalIcon />} title="SSH Guide" href="./compute-cluster/ssh" />
+  <Cards.Card icon={<ServerIcon />} title="SLURM Guide" href="./compute-cluster/slurm" />
+  <Cards.Card icon={<HelpCircleIcon />} title="Support Resources" href="./compute-cluster/support-resources" />
 </Cards>
