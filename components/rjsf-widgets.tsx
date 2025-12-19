@@ -4,6 +4,8 @@ import {
   FormEventHandler,
   SyntheticEvent,
   useCallback,
+  useMemo,
+  createElement,
 } from "react";
 import {
   ariaDescribedByIds,
@@ -135,12 +137,6 @@ function CustomCheckboxWidget<
   onChange,
   registry,
 }: WidgetProps<T, S, F>) {
-  const DescriptionFieldTemplate = getTemplate<
-    "DescriptionFieldTemplate",
-    T,
-    S,
-    F
-  >("DescriptionFieldTemplate", registry, options);
   // Because an unchecked checkbox will cause html5 validation to fail, only add
   // the "required" attribute if the field value must be "true", due to the
   // "const" or "enum" keywords
@@ -188,15 +184,22 @@ function CustomCheckboxWidget<
           {labelValue(<span>{label}</span>, hideLabel)}
         </label>
       </div>
-      {!hideLabel && !!description && (
-        <DescriptionFieldTemplate
-          id={descriptionId<T>(id)}
-          description={description}
-          schema={schema}
-          uiSchema={uiSchema}
-          registry={registry}
-        />
-      )}
+      {!hideLabel &&
+        !!description &&
+        createElement(
+          getTemplate<"DescriptionFieldTemplate", T, S, F>(
+            "DescriptionFieldTemplate",
+            registry,
+            options
+          ),
+          {
+            id: descriptionId<T>(id),
+            description,
+            schema,
+            uiSchema,
+            registry,
+          }
+        )}
     </div>
   );
 }

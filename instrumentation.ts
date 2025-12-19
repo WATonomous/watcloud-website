@@ -1,0 +1,24 @@
+// This file configures the initialization of Sentry on the server and edge.
+// The config you add here will be used whenever the server handles a request or edge functions are loaded.
+// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+
+import * as Sentry from "@sentry/nextjs";
+import { websiteConfig } from '@/lib/data'
+
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs' || process.env.NEXT_RUNTIME === 'edge') {
+    if (process.env.NODE_ENV === 'production') {
+      Sentry.init({
+        dsn: websiteConfig.sentry_dsn,
+
+        // Adjust this value in production, or use tracesSampler for greater control
+        tracesSampleRate: 1,
+
+        // Setting this option to true will print useful information to the console while you're setting up Sentry.
+        debug: false,
+      });
+    }
+  }
+}
+
+export const onRequestError = Sentry.captureRequestError;

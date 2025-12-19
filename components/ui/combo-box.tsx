@@ -9,6 +9,7 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
+    CommandList,
 } from "@/components/ui/command"
 import {
     Popover,
@@ -58,31 +59,33 @@ export function ComboBox({
             <PopoverContent className={cn("p-0", popoverContentClassName)}>
                 <Command>
                     <CommandInput className="focus-visible:ring-0 focus-visible:ring-offset-0" placeholder={searchPlaceholder} />
-                    <CommandEmpty>{emptySearchResultText}</CommandEmpty>
-                    <CommandGroup>
-                        {options.map((entry) => (
-                            <CommandItem
-                                key={entry.value}
-                                value={entry.value}
-                                onSelect={(currentValue) => {
-                                    if (allowDeselect && currentValue === value) {
-                                        setValue("")
-                                    } else if (currentValue !== value) {
-                                        setValue(currentValue)
-                                    }
-                                    setOpen(false)
-                                }}
-                            >
-                                <Check
-                                    className={cn(
-                                        "mr-2 h-4 w-4",
-                                        value === entry.value ? "opacity-100" : "opacity-0"
-                                    )}
-                                />
-                                {entry.label}
-                            </CommandItem>
-                        ))}
-                    </CommandGroup>
+                    <CommandList>
+                        <CommandEmpty>{emptySearchResultText}</CommandEmpty>
+                        <CommandGroup>
+                            {options.map((entry) => (
+                                <CommandItem
+                                    key={entry.value}
+                                    value={entry.value}
+                                    onSelect={(currentValue) => {
+                                        if (allowDeselect && currentValue === value) {
+                                            setValue("")
+                                        } else if (currentValue !== value) {
+                                            setValue(currentValue)
+                                        }
+                                        setOpen(false)
+                                    }}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            value === entry.value ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    {entry.label}
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
                 </Command>
             </PopoverContent>
         </Popover>

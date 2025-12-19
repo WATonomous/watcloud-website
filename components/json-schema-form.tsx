@@ -100,6 +100,74 @@ function getDefaultValues(schema: JSONSchema7Definition): any {
   }
 }
 
+function StringArrayField<TFieldValues extends FieldValues>({
+  path,
+  schema,
+  items,
+  form,
+  required,
+}: {
+  path: FieldPath<TFieldValues>;
+  schema: JSONSchema7;
+  items: JSONSchema7;
+  form: UseFormReturn<TFieldValues>;
+  required: boolean;
+}) {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: path as FieldArrayPath<TFieldValues>,
+  });
+
+  return (
+    <FormField
+      control={form.control}
+      name={path}
+      render={(renderProps) => {
+        return (
+          <FormItem className="grid">
+            <FormLabel className="space-x-0.5">
+              <span>{schema.title}</span>
+              {required || (schema.minItems && schema.minItems > 0)
+                ? REQUIRED_ELEM
+                : null}
+            </FormLabel>
+            <FormDescription>{schema.description}</FormDescription>
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex space-x-2">
+                {JSONSchemaFormRecursive(
+                  `${path}.${index}.value` as FieldPath<TFieldValues>,
+                  items,
+                  form
+                )}
+                <Button
+                  onClick={() => remove(index)}
+                  tabIndex={-1}
+                  className="mt-2"
+                >
+                  <Trash2Icon size={14} />
+                </Button>
+              </div>
+            ))}
+            <Button
+              className="justify-self-end"
+              onClick={(e) => {
+                e.preventDefault();
+                append({ value: "" } as FieldArray<
+                  TFieldValues,
+                  FieldArrayPath<TFieldValues>
+                >);
+              }}
+            >
+              <PlusIcon size={14} /> Add Item
+            </Button>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+}
+
 function JSONSchemaFormRecursive<TFieldValues extends FieldValues>(
   path: FieldPath<TFieldValues> | "",
   schema: JSONSchema7Definition,
@@ -147,63 +215,17 @@ function JSONSchemaFormRecursive<TFieldValues extends FieldValues>(
       throw new Error(`Array of array not supported`);
     }
     if (items.type === "string") {
-      // Disable warning about conditional use of useFieldArray. This is
-      // intentional here because this function is run with static schemas.
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { fields, append, remove } = useFieldArray({
-        control: form.control,
-        name: path as FieldArrayPath<TFieldValues>,
-      });
       if (path === "") {
         throw new Error(`Can't have a string array schema at the root`);
       }
 
       return (
-        <FormField
-          control={form.control}
-          name={path}
-          render={(renderProps) => {
-            return (
-              <FormItem className="grid">
-                <FormLabel className="space-x-0.5">
-                  <span>{schema.title}</span>
-                  {required || (schema.minItems && schema.minItems > 0)
-                    ? REQUIRED_ELEM
-                    : null}
-                </FormLabel>
-                <FormDescription>{schema.description}</FormDescription>
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex space-x-2">
-                    {JSONSchemaFormRecursive(
-                      `${path}.${index}.value` as FieldPath<TFieldValues>,
-                      items,
-                      form
-                    )}
-                    <Button
-                      onClick={() => remove(index)}
-                      tabIndex={-1}
-                      className="mt-2"
-                    >
-                      <Trash2Icon size={14} />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  className="justify-self-end"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    append({ value: "" } as FieldArray<
-                      TFieldValues,
-                      FieldArrayPath<TFieldValues>
-                    >);
-                  }}
-                >
-                  <PlusIcon size={14} /> Add Item
-                </Button>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+        <StringArrayField
+          path={path}
+          schema={schema}
+          items={items}
+          form={form}
+          required={required}
         />
       );
     } else {
