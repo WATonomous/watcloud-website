@@ -52,25 +52,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckSquareIcon } from "lucide-react"
 
 
-### Improve the landing page
+### WATcloud VSCode Extension
 
-Currently, the landing page is pretty bare. Let's make it look nicer by adding a hero image. Find more info [here](https://github.com/WATonomous/watcloud-website/issues/24).
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/4855 */}
 
-### Add a blog post tag system
+Build a VS Code extension that makes developing on WATcloud feel “one click”: connect to a node, bootstrap the environment, and see basic cluster status without leaving the editor.
 
-{/* Internal reference: https://github.com/WATonomous/infra-config/issues/3038 */}
-
-<Alert variant="success" className="mt-6">
-  <CheckSquareIcon className='h-5 w-5'/>
-  <AlertTitle>Completed</AlertTitle>
-  <AlertDescription>
-This project has been completed and the initial version is available [here](https://github.com/WATonomous/watcloud-website/commit/83d6f113ff4c14805554a5ed7adc6cf564a97ee1)
-    Please don't hesitate to reach out if you have any comments or suggestions!
-  </AlertDescription>
-</Alert>
-
-We have a blog post system that is powered by [Nextra](https://nextra.site/). We would like to add a tag system to the blog posts. This can be done by adding a new field to the blog post metadata. Find more info [here](https://github.com/WATonomous/watcloud-website/issues/44). 
-
+#### Feature ideas
+- Auto-generate SSH config entries for WATcloud nodes
+- “Connect to Node” command/button that launches VS Code Remote SSH
+- First-connect bootstrap: install VS Code server + required deps automatically
+- Basic cluster visibility (e.g. show maintenance/up/down summary)
+- Optional: “Start Job” command that prompts for CPU/RAM/GPU and generates the right `srun` command
 
 ### Open Source Tickets
 
@@ -171,6 +164,33 @@ We use Cloudflare as our DNS provider. Cloudflare was generous enough to give us
 [^assume-round-robin]: We are assuming that there's perfect DNS round-robin or random selection.
 [^similar-reliability]: It's slightly less reliable than Cloudflare's Zero-Downtime Failover, since there's a delay between when the host goes down and when the DNS record is removed. However, this is still much better than the current situation, where the DNS record of a downed host is never removed.
 
+### Improve the landing page
+
+<Alert variant="success" className="mt-6">
+  <CheckSquareIcon className='h-5 w-5'/>
+  <AlertTitle>Completed</AlertTitle>
+  <AlertDescription>
+	This project has been completed view the code [here](https://github.com/WATonomous/watcloud-website/commit/b5f5d209121ee5f56290505ed9d96cfaef50a4ef)
+    Please don't hesitate to reach out if you have any comments or suggestions!
+  </AlertDescription>
+</Alert>
+
+Currently, the landing page is pretty bare. Let's make it look nicer by adding a hero image. Find more info [here](https://github.com/WATonomous/watcloud-website/issues/24).
+
+### Add a blog post tag system
+
+{/* Internal reference: https://github.com/WATonomous/infra-config/issues/3038 */}
+
+<Alert variant="success" className="mt-6">
+  <CheckSquareIcon className='h-5 w-5'/>
+  <AlertTitle>Completed</AlertTitle>
+  <AlertDescription>
+	This project has been completed and the initial version is available [here](https://github.com/WATonomous/watcloud-website/commit/83d6f113ff4c14805554a5ed7adc6cf564a97ee1)
+    Please don't hesitate to reach out if you have any comments or suggestions!
+  </AlertDescription>
+</Alert>
+
+We have a blog post system that is powered by [Nextra](https://nextra.site/). We would like to add a tag system to the blog posts. This can be done by adding a new field to the blog post metadata. Find more info [here](https://github.com/WATonomous/watcloud-website/issues/44). 
 
 ### Broken External Link Detector
 
