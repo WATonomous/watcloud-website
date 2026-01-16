@@ -1,4 +1,4 @@
-{
+export default {
     "*": {
         "display": "hidden",
         "theme": {
