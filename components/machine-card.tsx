@@ -249,7 +249,7 @@ export function MachineCard({
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.ssh_host_keys.length, "SSH Host Key")}</dt>
                             <dd>
-                                <Pre hasCopyCode>
+                                <Pre>
                                     <Code>
                                         {machine.ssh_host_keys.join('\n')}
                                     </Code>

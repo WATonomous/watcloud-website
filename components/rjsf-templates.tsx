@@ -28,7 +28,7 @@ import {
   titleId,
 } from "@rjsf/utils";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import { ChangeEvent, FocusEvent, useCallback } from "react";
+import { ChangeEvent, FocusEvent, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 
 const REQUIRED_ELEM = (
@@ -122,16 +122,6 @@ function CustomArrayFieldTemplate({
   onAddClick,
 }: ArrayFieldTemplateProps) {
   const uiOptions = getUiOptions(uiSchema);
-  const ArrayFieldDescriptionTemplate = getTemplate(
-    "ArrayFieldDescriptionTemplate",
-    registry,
-    uiOptions
-  );
-  const ArrayFieldItemTemplate = getTemplate(
-    "ArrayFieldItemTemplate",
-    registry,
-    uiOptions
-  );
   const description = uiOptions.description || schema.description;
   return (
     <fieldset className={cn("space-y-2 grid", className)} id={idSchema.$id}>
@@ -143,20 +133,26 @@ function CustomArrayFieldTemplate({
         <span>{title}</span>
         {required ? REQUIRED_ELEM : null}
       </Label>
-      <ArrayFieldDescriptionTemplate
-        idSchema={idSchema}
-        description={description}
-        schema={schema}
-        uiSchema={uiSchema}
-        registry={registry}
-      />
+      {createElement(
+        getTemplate("ArrayFieldDescriptionTemplate", registry, uiOptions),
+        {
+          idSchema,
+          description,
+          schema,
+          uiSchema,
+          registry,
+        }
+      )}
       {items &&
-        items.map(({ key, ...itemProps }) => (
-          <ArrayFieldItemTemplate
-            key={key}
-            {...itemProps}
-          />
-        ))}
+        items.map(({ key, ...itemProps }) =>
+          createElement(
+            getTemplate("ArrayFieldItemTemplate", registry, uiOptions),
+            {
+              key,
+              ...itemProps,
+            }
+          )
+        )}
       {canAdd && (
         <Button
           className="justify-self-end"
@@ -225,16 +221,6 @@ function CustomObjectFieldTemplate({
   },
 }: ObjectFieldTemplateProps) {
   const options = getUiOptions(uiSchema);
-  const TitleFieldTemplate = getTemplate(
-    "TitleFieldTemplate",
-    registry,
-    options
-  );
-  const DescriptionFieldTemplate = getTemplate(
-    "DescriptionFieldTemplate",
-    registry,
-    options
-  );
 
   const isObject = schema.type === "object";
   const isRoot = idSchema.$id === "root";
@@ -246,25 +232,26 @@ function CustomObjectFieldTemplate({
     <fieldset id={idSchema.$id} className={cn("space-y-8", !isRoot && !isArrayElement && isObject && "p-4 pb-6 ring-1 ring-ring rounded-md")}>
       {(displayTitle || displayDescription) && (
         <div>
-          {displayTitle && (
-            <TitleFieldTemplate
-              id={titleId(idSchema)}
-              title={(<h2 className="text-2xl font-bold">{displayTitle}</h2>) as any}
-              required={required}
-              schema={schema}
-              uiSchema={uiSchema}
-              registry={registry}
-            />
-          )}
-          {displayDescription && (
-            <DescriptionFieldTemplate
-              id={descriptionId(idSchema)}
-              description={displayDescription}
-              schema={schema}
-              uiSchema={uiSchema}
-              registry={registry}
-            />
-          )}
+          {displayTitle &&
+            createElement(getTemplate("TitleFieldTemplate", registry, options), {
+              id: titleId(idSchema),
+              title: (<h2 className="text-2xl font-bold">{displayTitle}</h2>) as any,
+              required,
+              schema,
+              uiSchema,
+              registry,
+            })}
+          {displayDescription &&
+            createElement(
+              getTemplate("DescriptionFieldTemplate", registry, options),
+              {
+                id: descriptionId(idSchema),
+                description: displayDescription,
+                schema,
+                uiSchema,
+                registry,
+              }
+            )}
         </div>
       )}
       {properties.map((element) => element.content)}
@@ -347,13 +334,18 @@ function CustomBaseInputTemplate(props: BaseInputTemplateProps) {
     throw new Error(`no id for props ${JSON.stringify(props)}`);
   }
 
-  if (schema && schema['$autocomplete'] && !options.autocomplete) {
-    options.autocomplete = schema['$autocomplete'];
-  }
+  // Create a local copy of options to avoid mutating props
+  const localOptions = useMemo(() => {
+    const opts = { ...options };
+    if (schema && schema['$autocomplete'] && !opts.autocomplete) {
+      opts.autocomplete = schema['$autocomplete'];
+    }
+    return opts;
+  }, [options, schema]);
 
   const inputProps = {
     ...rest,
-    ...getInputProps(schema, type, options),
+    ...getInputProps(schema, type, localOptions),
   };
 
   let inputValue;
@@ -365,8 +357,8 @@ function CustomBaseInputTemplate(props: BaseInputTemplateProps) {
 
   const _onChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-      onChange(value === "" ? options.emptyValue : value),
-    [onChange, options]
+      onChange(value === "" ? localOptions.emptyValue : value),
+    [onChange, localOptions]
   );
   const _onBlur = useCallback(
     ({ target: { value } }: FocusEvent<HTMLInputElement>) => onBlur(id, value),

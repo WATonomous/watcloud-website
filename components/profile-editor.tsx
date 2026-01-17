@@ -27,8 +27,8 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email.",
+  email: z.email({
+    error: "Please enter a valid email.",
   }),
 });
 

@@ -160,7 +160,14 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
     const [open, setOpen] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
 
-    const [selected, setSelected] = React.useState<Option[]>(value || []);
+    const [internalSelected, setInternalSelected] = React.useState<Option[]>(value || []);
+    // Use value prop if provided (controlled), otherwise use internal state (uncontrolled)
+    const selected = value !== undefined ? value : internalSelected;
+    const setSelected = React.useCallback((newValue: Option[]) => {
+      setInternalSelected(newValue);
+      onChange?.(newValue);
+    }, [onChange]);
+    
     const [options, setOptions] = React.useState<GroupOption>(
       transToGroupOption(arrayOptions, groupBy)
     );
@@ -180,9 +187,8 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       (option: Option) => {
         const newOptions = selected.filter((s) => s.value !== option.value);
         setSelected(newOptions);
-        onChange?.(newOptions);
       },
-      [selected]
+      [selected, setSelected]
     );
 
     const handleKeyDown = React.useCallback(
@@ -200,14 +206,8 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
           }
         }
       },
-      [selected]
+      [selected, handleUnselect]
     );
-
-    useEffect(() => {
-      if (value) {
-        setSelected(value);
-      }
-    }, [value]);
 
     useEffect(() => {
       const doSearch = async () => {
@@ -230,7 +230,7 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       };
 
       void exec();
-    }, [debouncedSearchTerm, open]);
+    }, [debouncedSearchTerm, open, onSearch, groupBy, triggerSearchOnFocus]);
 
     const CreatableItem = () => {
       if (!creatable) return undefined;
@@ -251,7 +251,6 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
             setInputValue("");
             const newOptions = [...selected, { value, label: value }];
             setSelected(newOptions);
-            onChange?.(newOptions);
           }}
         >{`Create "${inputValue}"`}</CommandItem>
       );
@@ -308,7 +307,7 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       >
         <div
           className={cn(
-            "group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 bg-background",
+            "group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 bg-popover text-popover-foreground",
             className
           )}
         >
@@ -423,7 +422,6 @@ const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                 setInputValue("");
                                 const newOptions = [...selected, option];
                                 setSelected(newOptions);
-                                onChange?.(newOptions);
                               }}
                               className={cn(
                                 "cursor-pointer",

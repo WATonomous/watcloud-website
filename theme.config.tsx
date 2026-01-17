@@ -1,7 +1,7 @@
 import { DiscordIcon } from 'nextra/icons'
 import { Bot, Heart, Code2 } from "lucide-react"
 import websiteConfig from '@/build/fixtures/website-config.json'
-import { Link } from "nextra-theme-docs"
+import { Link, useConfig } from "nextra-theme-docs"
 import { BlogPostHeader, BlogPostFooter } from '@/components/blog-post'
 import { useRouter } from 'next/router'
 
@@ -58,18 +58,17 @@ const themeConfig = {
     icon: (
       <>
         <DiscordIcon />
-        <span className="nx-sr-only">Discord</span>
+        <span className="_sr-only">Discord</span>
       </>
     ),
     link: `https://discord.gg/${websiteConfig.discord_invite_code}`
   },
-  useNextSeoProps() {
-    return {
-      titleTemplate: '%s - WATcloud',
-    }
-  },
-  head: () => (
+  head: function Head() {
+    const { frontMatter } = useConfig();  
+
+    return (
     <>
+      <title>{frontMatter.title ? `${frontMatter.title} - WATcloud` : "WATcloud"}</title>
       <meta name="apple-mobile-web-app-title" content="Nextra" />
       <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       <link rel="icon" href="/favicon.png" type="image/png" />
@@ -86,14 +85,15 @@ const themeConfig = {
         media="(prefers-color-scheme: dark)"
       />
     </>
-  ),
+  )
+  },
   footer: {
-    text: (
+    content: (
       // Maybe create a footer component instead?
       // eg: map over FooterData.links, FooterData.icons
       <div className="w-full mx-auto max-w-screen-xl lg:flex lg:gap-x-20 lg:items-center lg:justify-between text-center lg:text-left">
         <span>
-          Made with <Heart className="inline-block align-text-bottom"/> using <Code2 className="inline-block align-text-bottom"/> and <Bot className="inline-block align-text-bottom"/><br className="md:hidden"/> by the WATcloud team.
+          Made with <Heart className="inline-block align-text-bottom" /> using <Code2 className="inline-block align-text-bottom" /> and <Bot className="inline-block align-text-bottom" /><br className="md:hidden" /> by the WATcloud team.
         </span>
         <ul className="flex flex-wrap justify-center items-start mt-8 lg:mt-0 text-sm font-medium text-gray-500 lg:flex-nowrap dark:text-gray-400 gap-6">
           <li>
@@ -123,7 +123,7 @@ const themeConfig = {
     const isBlogPost = router.pathname.startsWith("/blog/");
 
     const header = isBlogPost && <BlogPostHeader />;
-    const footer = isBlogPost && <><BlogPostFooter /><div className="mt-16"/></>;
+    const footer = isBlogPost && <><BlogPostFooter /><div className="mt-16" /></>;
 
     return (
       <>

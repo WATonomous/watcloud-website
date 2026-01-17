@@ -19,7 +19,7 @@ import {
 } from "@rjsf/validator-ajv8";
 import { JSONSchema7 } from "json-schema";
 import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { lookupStringMDX, userSchemaStrings } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import {
@@ -129,16 +129,21 @@ export default function OnboardingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const [formData, _setFormData] = useState(null as any);
+  const isInitializedRef = useRef(false);
+  const hasShownToastRef = useRef(false);
 
   // Use session storage to persist form data in case of accidental navigation.
   // We don't prevent navigation, because that's an anti-pattern:
   // https://reactrouter.com/en/main/hooks/use-blocker
   useEffect(() => {
-    if (!isReady) {
+    if (!isReady || isInitializedRef.current) {
       // The router is not ready yet, so the query params are not available.
       // https://github.com/vercel/next.js/discussions/11484#discussioncomment-356055
+      // Or we've already initialized the form data.
       return;
     }
+
+    isInitializedRef.current = true;
 
     try {
       const savedFormState = getFormState();
@@ -175,19 +180,26 @@ export default function OnboardingForm() {
       }
 
       if (initialFormData) {
-        _setFormData(initialFormData);
-        if (dataSource === "sessionStorage") {
-          toast.success("Successfully restored form data from session storage.");
-        } else if (dataSource === "queryParam") {
-          toast.success("Successfully loaded form data from query params.");
-        }
+        // Use flushSync to batch the state update before showing toast
+        // This ensures the state is updated synchronously before side effects
+        queueMicrotask(() => {
+          _setFormData(initialFormData);
+          if (!hasShownToastRef.current) {
+            hasShownToastRef.current = true;
+            if (dataSource === "sessionStorage") {
+              toast.success("Successfully restored form data from session storage.");
+            } else if (dataSource === "queryParam") {
+              toast.success("Successfully loaded form data from query params.");
+            }
+          }
+        });
       }
     } catch (e) {
       console.error("Failed to load saved form data", e);
 
       toast.error("Failed to load saved form data. Please see the browser console for more information.");
     }
-  }, [isReady, initialFormDataB64FromParam, expiresAtFromParam]);
+  }, [isReady, initialFormDataB64FromParam, expiresAtFromParam, _setFormData]);
 
   function setFormData(data: any) {
     _setFormData(data);
@@ -220,7 +232,7 @@ export default function OnboardingForm() {
     setAlertDescription("Below is the raw data from the form. You can send this to the WATcloud team for debugging purposes.");
     setAlertBody(
       <>
-        <Pre hasCopyCode>
+        <Pre>
           <Code>
             {JSON.stringify(postprocessFormData(formData), null, 2)}
           </Code>
@@ -237,7 +249,7 @@ export default function OnboardingForm() {
     const editLink = `${window.location.origin}${window.location.pathname}?${INITIAL_FORM_DATA_QUERY_PARAM}=${b64EncodeURI(JSON.stringify(postprocessFormData(formData)))}`;
     setAlertBody(
       <>
-        <Pre hasCopyCode>
+        <Pre>
           <Code>
             {editLink}
           </Code>
@@ -328,7 +340,7 @@ export default function OnboardingForm() {
               Successfully submitted registration request for <Code>{slug}</Code>! We will review your request and get back to you shortly.
               Your request ID is:
             </p>
-            <Pre hasCopyCode>
+            <Pre>
               <Code>
                 {requestID}
               </Code>

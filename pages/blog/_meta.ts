@@ -1,4 +1,4 @@
-{
+const metaConfig =  {
     "*": {
         "display": "hidden",
         "theme": {
@@ -8,4 +8,6 @@
             "typesetting": "article"
         }
     }
-}
+};
+
+export default metaConfig;
