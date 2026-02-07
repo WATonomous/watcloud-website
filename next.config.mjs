@@ -1,5 +1,9 @@
+import nextra from 'nextra'
+import { withSentryConfig } from "@sentry/nextjs"
+import withBundleAnalyzer from "@next/bundle-analyzer"
+
 // Original Next.js config
-module.exports = {
+const nextConfig = {
   reactStrictMode: true,
   output: 'export',
   images: {
@@ -24,33 +28,41 @@ module.exports = {
       'lib',
       'theme.config.tsx',
       "tailwind.config.js",
-      "next.config.js",
+      "next.config.mjs",
       "postcss.config.js",
     ]
   }
 }
 
 // Add Nextra config
-const withNextra = require('nextra')({
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.tsx',
   latex: true, // LaTeX support: https://nextra.site/docs/guide/advanced/latex
+  mdxOptions: {
+    rehypePrettyCodeOptions: {
+      // Available themes: https://shiki.style/themes
+      theme: {
+        dark: 'github-dark-dimmed',
+        light: 'github-light',
+      },
+    },
+  },
 });
-  
-module.exports = withNextra(module.exports)
+
+// Apply all the wrappers
+let finalConfig = withNextra(nextConfig)
 
 // Add Sentry config
-const { withSentryConfig } = require("@sentry/nextjs");
-
-module.exports = withSentryConfig(
-  module.exports,
+finalConfig = withSentryConfig(
+  finalConfig,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
 
     // Suppresses source map uploading logs during build
     silent: false,
-    
+
     // These variables are set in CI to enable source map uploading
     org: process.env.WATCLOUD_WEBSITE_SENTRY_ORG,
     project: process.env.WATCLOUD_WEBSITE_SENTRY_PROJECT,
@@ -78,8 +90,8 @@ module.exports = withSentryConfig(
 );
 
 // Add bundle analyzer config
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-module.exports = withBundleAnalyzer(module.exports);
+export default bundleAnalyzer(finalConfig);

@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -9,25 +9,25 @@
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
+
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
- 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
+
     --success: 120 50% 50%;
     --success-foreground: 0 0% 15%;
- 
+
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
 
@@ -37,57 +37,67 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
- 
+
     --radius: 0.5rem;
   }
- 
+
   /*
     :root[class~="dark"] is used to make dark mode work:
     https://github.com/shadcn-ui/ui/issues/313#issuecomment-1676513456
   */
-  .dark, :root[class~="dark"] {
-    --background: 222.2 84% 4.9%;
+  .dark,
+  :root[class~="dark"] {
+    /* 
+       Updated to match Nextra navbar color #0c0e12 (hsl(220 20% 5.9%))
+       Original: 222.2 84% 4.9% (#020817)
+    */
+    --background: 220 20% 5.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-  
+
     --success: 120 70% 60%;
     --success-foreground: 0 0% 100%;
 
     --warning: 48 96% 89%;
     --warning-foreground: 38 92% 50%;
- 
+
     --destructive: 0, 94.2%, 30.2%;
     --destructive-foreground: 210, 50%, 68%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground !important;
+  }
+
+  a {
+    @apply text-primary underline underline-offset-1;
   }
 }
 
@@ -96,10 +106,10 @@
     Uppy uses a max z-index of 1005:
     https://github.com/transloadit/uppy/blob/68af8a3c0f96a0fc37f6b2aa844df81e6f218fb4/packages/%40uppy/core/src/_variables.scss#L50-L56
   */
-  z-index: 1020; 
-} 
+  z-index: 1020;
+}
 
-.form-description p.nx-leading-7 {
+.form-description p._leading-7 {
   /* Change the styling of generated MDX content that are embedded in forms */
   line-height: 1.375;
 }
@@ -126,10 +136,10 @@ textarea {
 
 
 /* Fix margin issue for nested lists: https://github.com/shuding/nextra/issues/863#issuecomment-2068517369 */
-div > ul.first\:nx-mt-0:first-of-type,
-div > ol.first\:nx-mt-0:first-of-type,
-li > ul.first\:nx-mt-0:first-of-type,
-li > ol.first\:nx-mt-0:first-of-type {
+div>ul.first\:_mt-0:first-of-type,
+div>ol.first\:_mt-0:first-of-type,
+li>ul.first\:_mt-0:first-of-type,
+li>ol.first\:_mt-0:first-of-type {
   margin-top: 0;
 }
 
@@ -140,4 +150,20 @@ section.footnotes is created by the remark-gfm plugin:
 */
 section.footnotes {
   @apply border-t mt-6 border-gray-400 border-opacity-20;
+}
+
+/* Remove underlines from navigation links */
+.nextra-sidebar-container a,
+.nextra-nav-container a,
+.nextra-toc a {
+  @apply no-underline hover:no-underline;
+}
+
+/* Style sidebar footer to match theme */
+.nextra-sidebar-footer {
+  @apply border-t border-border bg-background;
+}
+
+.nextra-sidebar-footer button {
+  @apply text-muted-foreground hover:text-foreground;
 }

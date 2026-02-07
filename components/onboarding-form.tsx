@@ -81,7 +81,7 @@ function string_to_mdx(str: string) {
 
 function postprocessFormData(data: Record<string, unknown>) {
   for (const path of cryptPaths) {
-    for (const {value, path: actualPath } of getValuesFromPath(
+    for (const { value, path: actualPath } of getValuesFromPath(
       data,
       path
     )) {
@@ -93,7 +93,7 @@ function postprocessFormData(data: Record<string, unknown>) {
     }
   }
   for (const path of bcryptPaths) {
-    for (const {value, path: actualPath } of getValuesFromPath(
+    for (const { value, path: actualPath } of getValuesFromPath(
       data,
       path
     )) {
@@ -109,7 +109,7 @@ function postprocessFormData(data: Record<string, unknown>) {
 }
 
 export default function OnboardingForm() {
-  const {query, isReady} = useRouter();
+  const { query, isReady } = useRouter();
   // parse initial form data from query params
   const expiresAtFromParam = Array.isArray(query[EXPIRES_AT_QUERY_PARAM])
     ? query[EXPIRES_AT_QUERY_PARAM][0]
@@ -220,7 +220,7 @@ export default function OnboardingForm() {
     setAlertDescription("Below is the raw data from the form. You can send this to the WATcloud team for debugging purposes.");
     setAlertBody(
       <>
-        <Pre hasCopyCode>
+        <Pre>
           <Code>
             {JSON.stringify(postprocessFormData(formData), null, 2)}
           </Code>
@@ -237,7 +237,7 @@ export default function OnboardingForm() {
     const editLink = `${window.location.origin}${window.location.pathname}?${INITIAL_FORM_DATA_QUERY_PARAM}=${b64EncodeURI(JSON.stringify(postprocessFormData(formData)))}`;
     setAlertBody(
       <>
-        <Pre hasCopyCode>
+        <Pre>
           <Code>
             {editLink}
           </Code>
@@ -328,7 +328,7 @@ export default function OnboardingForm() {
               Successfully submitted registration request for <Code>{slug}</Code>! We will review your request and get back to you shortly.
               Your request ID is:
             </p>
-            <Pre hasCopyCode>
+            <Pre>
               <Code>
                 {requestID}
               </Code>

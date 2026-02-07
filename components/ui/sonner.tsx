@@ -1,14 +1,14 @@
-import { useConfig } from "nextra-theme-docs"
+import { useTheme } from "nextra-theme-docs"
 import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { darkMode } = useConfig();
+  const { theme = "system" } = useTheme();
 
   return (
     <Sonner
-      theme={darkMode === true ? "dark" : darkMode === false ? "light" : "system"}
+      theme={theme as "light" | "dark" | "system"}
       className="toaster group"
       toastOptions={{
         classNames: {

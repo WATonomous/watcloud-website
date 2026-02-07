@@ -1,5 +1,4 @@
 import Uppy from '@uppy/core';
-import type { UppyFile, SuccessResponse } from '@uppy/core'
 import { Dashboard } from '@uppy/react';
 import AwsS3 from '@uppy/aws-s3';
 import { useEffect, useState } from 'react';
@@ -45,7 +44,7 @@ const extractSha256FromURI = (uri: string) => {
 }
 
 const assetInspectorFormSchema = z.object({
-  uris: z.string(),
+    uris: z.string(),
 });
 
 async function resolveURI(uri: string) {
@@ -115,7 +114,7 @@ export function AssetInspector() {
         const uris = urisString.split('\n').map((uri) => uri.trim()).filter((uri) => uri.length > 0);
 
         try {
-            const results = await Promise.all(uris.map(uri => 
+            const results = await Promise.all(uris.map(uri =>
                 resolveURI(uri).catch((error: Error) => ({ uri: uri, error: error }))
             ));
 
@@ -158,22 +157,22 @@ export function AssetInspector() {
                     <div key={res.uri}>
                         {i !== 0 && (<Separator className="my-6" />)}
                         <span className="text-sm text-gray-500">URI</span>
-                        <Pre hasCopyCode className="-mt-5"><Code>{res.uri}</Code></Pre>
+                        <Pre className="-mt-5"><Code>{res.uri}</Code></Pre>
                         {'result' in res && (
                             <>
                                 <span className="text-sm text-gray-500">Resolved</span>
-                                <Pre hasCopyCode className="-mt-5"><Code>{res.result.url}</Code></Pre>
+                                <Pre className="-mt-5"><Code>{res.result.url}</Code></Pre>
                                 {res.result.lastModified && (
                                     <>
                                         <span className="text-sm text-gray-500 block">Last Modified</span>
-                                        <Pre hasCopyCode className="-mt-5"><Code>{dayjs().to(res.result.lastModified)} ({res.result.lastModified.toISOString()})</Code></Pre>
+                                        <Pre className="-mt-5"><Code>{dayjs().to(res.result.lastModified)} ({res.result.lastModified.toISOString()})</Code></Pre>
                                     </>
 
                                 )}
                                 <>
                                     <span className="text-sm text-gray-500 block">Expires</span>
-                                    <Pre hasCopyCode className="-mt-5"><Code>{
-                                        res.result.expiresAt ? 
+                                    <Pre className="-mt-5"><Code>{
+                                        res.result.expiresAt ?
                                             `${dayjs().to(res.result.expiresAt)} (${res.result.expiresAt.toISOString()})` :
                                             'Never'
                                     }</Code></Pre>
@@ -181,7 +180,7 @@ export function AssetInspector() {
                                 {res.result.headers && (
                                     <>
                                         <span className="text-sm text-gray-500 block">Raw Headers</span>
-                                        <Pre hasCopyCode className="-mt-5"><Code>{JSON.stringify(Object.fromEntries(res.result.headers), null, 2)}</Code></Pre>
+                                        <Pre className="-mt-5"><Code>{JSON.stringify(Object.fromEntries(res.result.headers), null, 2)}</Code></Pre>
                                     </>
                                 )}
                             </>
@@ -225,38 +224,39 @@ export function AssetUploader() {
             maxFileSize: UPLOADER_MAX_FILE_SIZE,
         },
     })
-    .use(AwsS3, {
-        shouldUseMultipart: false,
-        getUploadParameters: async (file) => {
-            const hash = sha256(await file.data.arrayBuffer());
-            sha256Cache.set(file.id, hash);
+        .use(AwsS3, {
+            shouldUseMultipart: false,
+            getUploadParameters: async (file) => {
+                const hash = sha256(await file.data.arrayBuffer());
+                sha256Cache.set(file.id, hash);
 
-            return {
-                method: 'PUT',
-                url: `${UPLOADER_S3_HOST}/${UPLOADER_S3_BUCKET}/${hash}`,
-            };
-        }
-    }));
+                return {
+                    method: 'PUT',
+                    url: `${UPLOADER_S3_HOST}/${UPLOADER_S3_BUCKET}/${hash}`,
+                };
+            }
+        }));
 
     useEffect(() => {
         function handleUpload() {
             setErrorMessages([]);
         }
-        async function handleUploadSuccess(file: UppyFile | undefined, response: SuccessResponse) {
+        async function handleUploadSuccess(file: { id: string; name?: string; data: Blob } | undefined, response: unknown) {
             if (!file) {
                 console.warn('Got upload success event without a file:', response)
                 return;
             }
             const hash = sha256Cache.get(file.id) || sha256(await file.data.arrayBuffer());
-            const watcloudURI = `watcloud://v1/sha256:${hash}?name=${encodeURIComponent(file.name)}`;
+            const fileName = file.name ?? 'unnamed';
+            const watcloudURI = `watcloud://v1/sha256:${hash}?name=${encodeURIComponent(fileName)}`;
             console.log('Uploaded file:', file, 'Response:', response, 'watcloud URI:', watcloudURI);
 
             setSuccessfulUploads((prev) => [{
-                name: file.name,
+                name: fileName,
                 uri: watcloudURI,
             }, ...prev]);
         }
-        function handleUppyError(file: UppyFile | undefined, error: any) {
+        function handleUppyError(file: { id: string; name?: string } | undefined, error: any) {
             console.error('Failed upload:', file, "Error:", error, "Response status:", error.source?.status);
             setErrorMessages((prev) => [`Failed to upload ${file?.name}: "${error.message}", response status: "${error.source?.status}", response body: "${error.source?.responseText}"`, ...prev]);
         }
@@ -274,33 +274,33 @@ export function AssetUploader() {
 
     return (
         <>
-        <Dashboard
-            uppy={uppy}
-            note={`Maximum file size: ${bytesToSize(UPLOADER_MAX_FILE_SIZE, 0)}`}
-            width="100%"
-            theme={uppyTheme}
-            showProgressDetails={true}
-        />
-        <h4 className="mt-8 mb-4 text-md">Successful Uploads</h4>
-        {successfulUploads.map(({name, uri}) => (
-            <div key={uri}>
-                <span className="text-sm text-gray-500">{name}</span>
-                <Pre hasCopyCode className="-mt-5"><Code>{uri}</Code></Pre>
-            </div>
-        ))}
-        {successfulUploads.length === 0 && (
-            <p className="text-sm text-gray-500">No successful uploads yet. Upload a file to get started!</p>
-        )}
-        {errorMessages.length > 0 && (
-            <>
-                <h4 className="mt-8 mb-4 text-md">Errors</h4>
-                {errorMessages.map((message, i) => (
-                    <div key={i}>
-                        <span className="text-red-500">{message}</span>
-                    </div>
-                ))}
-            </>
-        )}
+            <Dashboard
+                uppy={uppy}
+                note={`Maximum file size: ${bytesToSize(UPLOADER_MAX_FILE_SIZE, 0)}`}
+                width="100%"
+                theme={uppyTheme}
+                showProgressDetails={true}
+            />
+            <h4 className="mt-8 mb-4 text-md">Successful Uploads</h4>
+            {successfulUploads.map(({ name, uri }) => (
+                <div key={uri}>
+                    <span className="text-sm text-gray-500">{name}</span>
+                    <Pre className="-mt-5"><Code>{uri}</Code></Pre>
+                </div>
+            ))}
+            {successfulUploads.length === 0 && (
+                <p className="text-sm text-gray-500">No successful uploads yet. Upload a file to get started!</p>
+            )}
+            {errorMessages.length > 0 && (
+                <>
+                    <h4 className="mt-8 mb-4 text-md">Errors</h4>
+                    {errorMessages.map((message, i) => (
+                        <div key={i}>
+                            <span className="text-red-500">{message}</span>
+                        </div>
+                    ))}
+                </>
+            )}
         </>
     );
 }

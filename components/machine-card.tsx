@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import useSWR from 'swr'
 import {
     HelpCircle,
     Circle,
+    Copy,
+    Check,
 } from "lucide-react"
 import {
     bytesToSize,
@@ -42,17 +45,42 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Pre, Code } from "nextra/components"
+import { Code } from "nextra/components"
 import { Link } from "nextra-theme-docs"
 import { MachineInfo, websiteConfig } from '@/lib/data'
 import { hostnameSorter } from '@/lib/wato-utils'
+
+function CopyableCodeBlock({ content }: { content: string }) {
+    const [copied, setCopied] = useState(false)
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(content)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+        <div className="relative group">
+            <button
+                onClick={handleCopy}
+                className="absolute top-2 right-2 p-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Copy to clipboard"
+            >
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+            </button>
+            <pre className="rounded-md bg-gray-900 p-4 pr-12 text-sm text-gray-100 font-mono whitespace-pre overflow-x-auto">
+                {content}
+            </pre>
+        </div>
+    )
+}
 
 export function MachineCard({
     machine,
 }: {
     machine: UnionOfElementTypes<MachineInfo["machines"]>,
 }) {
-    const { data, error, isLoading } : {
+    const { data, error, isLoading }: {
         data?: HealthchecksioCheckProcessed[],
         error?: any,
         isLoading?: boolean,
@@ -63,8 +91,8 @@ export function MachineCard({
                 'X-Api-Key': key,
             },
         }).then(data => data['checks'].map((check: HealthchecksioCheck) => ({
-                ...check,
-                tags: check['tags'].split(' ')
+            ...check,
+            tags: check['tags'].split(' ')
         }))),
         {
             refreshInterval: 10000, // milliseconds
@@ -79,7 +107,7 @@ export function MachineCard({
         if (machineChecks.every(check => check.status === "down")) {
             machineHealthColor = "red"
             machineHealthDescription = `${machine.name} is down`
-        } else if (machineChecks.every(check => ["up","grace"].includes(check.status))) {
+        } else if (machineChecks.every(check => ["up", "grace"].includes(check.status))) {
             machineHealthColor = "green"
             machineHealthDescription = `${machine.name} is healthy`
         } else {
@@ -105,8 +133,8 @@ export function MachineCard({
                         check.status === "down"
                             ? "red"
                             : ["up", "grace"].includes(check.status)
-                            ? "green"
-                            : "gray";
+                                ? "green"
+                                : "gray";
                     return (
                         <TableRow key={check.slug} className="hover:bg-inherit border-b-0">
                             <TableCell className="p-0.5">
@@ -131,37 +159,37 @@ export function MachineCard({
     return (
         <Card>
             <CardHeader>
-            <CardTitle className="mb-1">
-                {machine.name}
-                <Popover>
-                    <PopoverTrigger>
-                        <Circle size="10" className="inline-flex align-baseline ml-2 my-0.5" fill={machineHealthColor} color={machineHealthColor} />
-                    </PopoverTrigger>
-                    <PopoverContent side="top">
-                        <p>{machineHealthDescription}</p>
-                        {machineHealthSummary}
-                    </PopoverContent>
-                </Popover>
-                {
-                    machine.tags.map(({name, description}) => (
-                        <span key={name} className="ml-2 mr-1">
-                            <Popover>
-                                <PopoverTrigger><Badge className="align-bottom">{name}</Badge></PopoverTrigger>
-                                <PopoverContent side="top">{description}</PopoverContent>
-                            </Popover>
-                        </span>
-                    ))
-                }
-            </CardTitle>
-            <CardDescription>{
-                `${pluralizeWithCount(parseInt(machine.cpu_info['logical_processors'] || "0"), "CPU")}`
-                + `, ${bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0")*1024, 0)} RAM`
-                + ('gpus' in machine && machine.gpus?.length ? `, ${pluralizeWithCount(machine.gpus.length, "GPU")}` : "")
-            }</CardDescription>
+                <CardTitle className="mb-1">
+                    {machine.name}
+                    <Popover>
+                        <PopoverTrigger>
+                            <Circle size="10" className="inline-flex align-baseline ml-2 my-0.5" fill={machineHealthColor} color={machineHealthColor} />
+                        </PopoverTrigger>
+                        <PopoverContent side="top">
+                            <p>{machineHealthDescription}</p>
+                            {machineHealthSummary}
+                        </PopoverContent>
+                    </Popover>
+                    {
+                        machine.tags.map(({ name, description }) => (
+                            <span key={name} className="ml-2 mr-1">
+                                <Popover>
+                                    <PopoverTrigger><Badge className="align-bottom">{name}</Badge></PopoverTrigger>
+                                    <PopoverContent side="top">{description}</PopoverContent>
+                                </Popover>
+                            </span>
+                        ))
+                    }
+                </CardTitle>
+                <CardDescription>{
+                    `${pluralizeWithCount(parseInt(machine.cpu_info['logical_processors'] || "0"), "CPU")}`
+                    + `, ${bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0") * 1024, 0)} RAM`
+                    + ('gpus' in machine && machine.gpus?.length ? `, ${pluralizeWithCount(machine.gpus.length, "GPU")}` : "")
+                }</CardDescription>
             </CardHeader>
             <CardContent className="grid text-sm">
                 <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700 overflow-hidden">
-                    { 'hostnames' in machine && machine.hostnames?.length ? (
+                    {'hostnames' in machine && machine.hostnames?.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.hostnames.length, "Hostname")}
                                 <Popover>
@@ -186,7 +214,7 @@ export function MachineCard({
                             </dd>
                         </div>
                     ) : undefined}
-                    { 'lsb_release_info' in machine && machine.lsb_release_info ? (
+                    {'lsb_release_info' in machine && machine.lsb_release_info ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">OS</dt>
                             <dd className="font-medium">{machine.lsb_release_info['description']}</dd>
@@ -211,9 +239,9 @@ export function MachineCard({
                     </div>
                     <div className="flex flex-col py-3 first:pt-0">
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">RAM</dt>
-                        <dd className="font-medium">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0")*1024, 0)}</dd>
+                        <dd className="font-medium">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0") * 1024, 0)}</dd>
                     </div>
-                    { 'gpus' in machine && machine.gpus.length ? (
+                    {'gpus' in machine && machine.gpus.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.gpus.length, "GPU")}</dt>
                             <dd className="font-medium">
@@ -229,7 +257,7 @@ export function MachineCard({
                             </dd>
                         </div>
                     ) : undefined}
-                    { 'hosted_storage' in machine && machine.hosted_storage.length ? (
+                    {'hosted_storage' in machine && machine.hosted_storage.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">Hosted Storage</dt>
                             <dd className="font-medium">
@@ -245,15 +273,11 @@ export function MachineCard({
                             </dd>
                         </div>
                     ) : undefined}
-                    { 'ssh_host_keys' in machine && machine.ssh_host_keys?.length ? (
+                    {'ssh_host_keys' in machine && machine.ssh_host_keys?.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.ssh_host_keys.length, "SSH Host Key")}</dt>
                             <dd>
-                                <Pre hasCopyCode>
-                                    <Code>
-                                        {machine.ssh_host_keys.join('\n')}
-                                    </Code>
-                                </Pre>
+                                <CopyableCodeBlock content={machine.ssh_host_keys.join('\n')} />
                             </dd>
                         </div>
                     ) : undefined}

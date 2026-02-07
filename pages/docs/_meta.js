@@ -1,4 +1,4 @@
-{
+const meta = {
   "index": "Introduction",
   "services": "Services",
   "compute-cluster": "Compute Cluster",
@@ -6,3 +6,5 @@
   "utilities": "Utilities",
   "community-docs": "Community Docs"
 }
+
+export default meta

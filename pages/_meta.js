@@ -1,4 +1,4 @@
-{
+const meta = {
   "index": {
     "title": "Welcome",
     "type": "page",
@@ -39,3 +39,5 @@
     "display": "hidden"
   }
 }
+
+export default meta
