@@ -149,7 +149,7 @@ This project is currently in the deployment stage. The source code will be made 
 
 At WATcloud, we have many shared drives that are used by our users to store files. However, users often don't delete their files, and drives quickly fill up. We need a tool that can give us a list of files that have not been accessed in a long time, so that we can take appropriate action (e.g. notify the user, then delete the file). This tool should be a lightweight script that we can run on a schedule.
 
-Assume that the drive is 2-5 TiB, backed by NVMe SSD. The filesystem type is flexible, but preferrably ext4 or xfs. The tool should have minimal impact on drive lifespan. Please be aware of the different timestamp types (e.g. access time, modification time, inode change time), and how they are accounted for by different filesystems and access methods.
+Assume that the drive is 2-5 TiB, backed by NVMe SSD. The filesystem type is flexible, but preferably ext4 or xfs. The tool should have minimal impact on drive lifespan. Please be aware of the different timestamp types (e.g. access time, modification time, inode change time), and how they are accounted for by different filesystems and access methods.
 
 ### Automatic DNS failover
 

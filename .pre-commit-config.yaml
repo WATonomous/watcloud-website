@@ -1,0 +1,10 @@
+repos:
+  - repo: https://github.com/codespell-project/codespell
+    # v2.4.1
+    rev: 63c8f8312b7559622c0d82815639671ae42132ac
+    hooks:
+      - id: codespell
+        args:
+          - --skip=.git,*.json,*.svg,*.css,node_modules
+          - --ignore-words=.github/codespell/ignore-words.txt
+          - --builtin=clear,rare,informal

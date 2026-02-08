@@ -49,3 +49,25 @@ WATcloud admins can apply changes from the public repo to the internal repo by r
 PR_NUMBER=28
 curl https://patch-diff.githubusercontent.com/raw/WATonomous/watcloud-website/pull/$PR_NUMBER.patch | git am --directory=website
 ```
+
+## Development
+
+### Spell Checking
+
+This project uses [CodeSpell](https://github.com/codespell-project/codespell) to catch common spelling mistakes in documentation and code comments. Configuration files are located in `.github/codespell/`.
+
+To install codespell and run it manually:
+
+```bash
+pip install codespell
+npm run lint:spell
+```
+
+To install the pre-commit hook for automatic checking:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+To add words to the ignore list (for false positives), edit `.github/codespell/ignore-words.txt`.

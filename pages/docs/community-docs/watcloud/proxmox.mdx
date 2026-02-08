@@ -129,7 +129,7 @@ In the development container, run the following commands to apply the Terraform 
 ```
 
 Please ensure that the VM is the only change to be performed by the provisioner.
-If changes to another VM is shown, someone probably forgot to commit their changes.
+If changes to another VM are shown, someone probably forgot to commit their changes.
 Please abort and consult with the team before proceeding.
 
 Example output:
@@ -387,7 +387,7 @@ echo "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBA
 
 After cloud-init has finished, the VM will have the correct hostname.
 Restart the VM to trigger a DHCP reset[^dhcp-restart].
-This will allow the cluster switch to receive the new hostname and assign a temporary `.watocluster.local` domain for initial provisoining.
+This will allow the cluster switch to receive the new hostname and assign a temporary `.watocluster.local` domain for initial provisioning.
 
 [^dhcp-restart]: This may also be done some other way (e.g. using `dhclient`). However, restarting the VM has always worked for us and is a simple solution without digging into the details.
 
@@ -410,7 +410,7 @@ This configuration can be derived from other VM configurations of the same type.
 Because we configured the VM to use a MAC address for the university network, we update the corresponding entry in the configuration.
 
 Note that we left some parts of the configuration commented out. Specifically, the parts related to microk8s.
-This is because there is a circular reference--some parts of the repo (namely DNS management) depends on the microk8s configuration,
+This is because there is a circular reference--some parts of the repo (namely DNS management) depend on the microk8s configuration,
 and provisioning VMs depends on the DNS configuration. We will add back the microk8s configuration after the base configuration is applied.
 
 Also note that `ansible_hosts` contains the `.watocluster.local` domain that is automatically assigned by the cluster switch.
@@ -564,7 +564,7 @@ RUNNING HANDLER [common : Apply netplan] ***************************************
 ```
 
 This is because the VM's networking configuration changed and is no longer accessible via `*.watocluster.local`.
-When this happens, you can interrupt the process (`Ctrl+C`) and replace the `ansible_hosts` entry in the configuration with the new domain provisioined earlier.
+When this happens, you can interrupt the process (`Ctrl+C`) and replace the `ansible_hosts` entry in the configuration with the new domain provisioned earlier.
 
 ```diff
 diff --git a/directory/hosts/host-config.yml b/directory/hosts/host-config.yml

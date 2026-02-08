@@ -1,0 +1,2 @@
+# Words to ignore for codespell
+# Add false positives here (one word per line)

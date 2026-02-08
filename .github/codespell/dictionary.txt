@@ -1,0 +1,3 @@
+# Custom dictionary for codespell corrections
+# Format: misspelling->correction
+watcloud->WATcloud
