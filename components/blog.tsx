@@ -88,10 +88,16 @@ export function BlogIndex() {
     }, [router.isReady, activeTag])
     // excluding router object from deps to prevent infinite loop (it changes on every navigation)
 
-    // Filter blogs by tag
+    // Filter blogs by tag and sort by date (newest first)
     const filteredPosts = allPosts.filter((page) => {
             const frontMatter = (page as MdxFile).frontMatter || {};
             return !activeTag || frontMatter.tags && frontMatter.tags.includes(activeTag);
+    }).sort((a, b) => {
+        const fmA = (a as MdxFile).frontMatter || {};
+        const fmB = (b as MdxFile).frontMatter || {};
+        const timeA = fmA.date && fmA.timezone ? dayjsTz(fmA.date, fmA.timezone).valueOf() : 0;
+        const timeB = fmB.date && fmB.timezone ? dayjsTz(fmB.date, fmB.timezone).valueOf() : 0;
+        return timeB - timeA;
     });
     
     // Get blog info
