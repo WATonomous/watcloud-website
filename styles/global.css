@@ -152,10 +152,11 @@ section.footnotes {
   @apply border-t mt-6 border-gray-400 border-opacity-20;
 }
 
-/* Remove underlines from navigation links */
+/* Remove underlines from navigation and search result links */
 .nextra-sidebar-container a,
 .nextra-nav-container a,
-.nextra-toc a {
+.nextra-toc a,
+.nextra-search-results a {
   @apply no-underline hover:no-underline;
 }
 
