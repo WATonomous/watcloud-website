@@ -33,7 +33,7 @@ import {
 import { Checkbox } from "./ui/checkbox";
 import { ariaDescribedByIds, toPathSchema } from "@rjsf/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
-import { Code, Pre } from "nextra/components";
+import { CopyableCode } from "@/components/ui/copy-button";
 import { Textarea } from "@/components/ui/textarea";
 import { debounce, deepSet, encryptUnixPassword, getDayjsRelative, encryptBcryptPassword, getObjectPaths, getValuesFromPath, isCryptFormat, isBcryptFormat } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
@@ -219,13 +219,9 @@ export default function OnboardingForm() {
     setAlertTitle("Raw data");
     setAlertDescription("Below is the raw data from the form. You can send this to the WATcloud team for debugging purposes.");
     setAlertBody(
-      <>
-        <Pre>
-          <Code>
-            {JSON.stringify(postprocessFormData(formData), null, 2)}
-          </Code>
-        </Pre>
-      </>
+      <CopyableCode>
+        {JSON.stringify(postprocessFormData(formData), null, 2)}
+      </CopyableCode>
     )
     setIsAlertOpen(true);
   }
@@ -236,13 +232,9 @@ export default function OnboardingForm() {
     setAlertDescription("Below is a link to the form with the current data pre-filled. You can send this to others as a template.");
     const editLink = `${window.location.origin}${window.location.pathname}?${INITIAL_FORM_DATA_QUERY_PARAM}=${b64EncodeURI(JSON.stringify(postprocessFormData(formData)))}`;
     setAlertBody(
-      <>
-        <Pre>
-          <Code>
-            {editLink}
-          </Code>
-        </Pre>
-      </>
+      <CopyableCode>
+        {editLink}
+      </CopyableCode>
     )
     setIsAlertOpen(true);
   }
@@ -325,14 +317,10 @@ export default function OnboardingForm() {
         setAlertBody(
           <div className="my-4">
             <p>
-              Successfully submitted registration request for <Code>{slug}</Code>! We will review your request and get back to you shortly.
+              Successfully submitted registration request for <code className="rounded bg-muted px-1 py-0.5 text-sm">{slug}</code>! We will review your request and get back to you shortly.
               Your request ID is:
             </p>
-            <Pre>
-              <Code>
-                {requestID}
-              </Code>
-            </Pre>
+            <CopyableCode>{requestID}</CopyableCode>
             <p>Please send this to your WATcloud contact for approval and deployment.</p>
           </div>
         )

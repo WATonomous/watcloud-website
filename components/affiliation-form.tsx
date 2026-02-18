@@ -13,12 +13,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { slugify } from "@/lib/utils";
+import { CopyableCode } from "@/components/ui/copy-button";
 import Form from "@rjsf/core"; // Or whatever theme you use
 import {
   createPrecompiledValidator,
 } from "@rjsf/validator-ajv8";
 import { JSONSchema7 } from "json-schema";
 import { Loader2 } from "lucide-react";
+import React from "react";
 import { createRef, useState } from "react";
 
 const validator = createPrecompiledValidator(
@@ -32,12 +34,14 @@ export default function AffiliationForm() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertDescription, setAlertDescription] = useState("");
+  const [alertBody, setAlertBody] = useState(null as React.JSX.Element | null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit({ formData: data }: any) {
     setIsAlertOpen(true);
     setAlertTitle("Submitting");
     setAlertDescription("Please wait while we submit your request...");
+    setAlertBody(null);
     setIsSubmitting(true);
 
     const { name } = data;
@@ -63,11 +67,20 @@ export default function AffiliationForm() {
       });
 
       if (res.status === 200) {
+        const resJson = await res.json();
+        const requestID = resJson.pr_url;
         setAlertTitle("Success!");
-        setAlertDescription(
-          `Successfully submitted registration request for "${name}"!` +
-            ` We will review your request and get back to you shortly.` +
-            ` Your request ID is "${(await res.json()).pr_url}".`
+        setAlertDescription("");
+        setAlertBody(
+          <div className="my-4">
+            <p>
+              Successfully submitted registration request for &quot;{name}&quot;!
+              We will review your request and get back to you shortly.
+              Your request ID is:
+            </p>
+            <CopyableCode>{requestID}</CopyableCode>
+            <p>Please send this to your WATcloud contact for approval and deployment.</p>
+          </div>
         );
         if (!formRef.current) {
           console.error(`Form ref is not set! formRef: ${formRef}, formRef.current: ${formRef.current}`);
@@ -111,6 +124,7 @@ export default function AffiliationForm() {
             <AlertDialogTitle>{alertTitle}</AlertDialogTitle>
             <AlertDialogDescription>{alertDescription}</AlertDialogDescription>
           </AlertDialogHeader>
+          {alertBody}
           <AlertDialogFooter>
             {isSubmitting ? (
               <AlertDialogAction disabled>
