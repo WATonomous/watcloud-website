@@ -324,7 +324,11 @@ export default function OnboardingForm() {
             <p>Please send this to your WATcloud contact for approval and deployment.</p>
           </div>
         )
-        setFormData({});
+        // Clear form data without persisting the empty state to sessionStorage.
+        // Using _setFormData(null) instead of setFormData({}) avoids saving an empty
+        // object to sessionStorage, which would "brick" the form on subsequent loads.
+        _setFormData(null);
+        window.sessionStorage.removeItem(FORM_STATE_KEY);
       } else {
         const errmsg = `Something went wrong! Error code: ${res.status}. Error message: "${await res.text()}".`;
         console.error(errmsg);
