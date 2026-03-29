@@ -544,6 +544,20 @@ You can request multiple GRES by separating them with a comma. For example, to r
 srun --gres shard:1024,tmpdisk:2048 --pty bash
 ```
 
+### Email Alerts
+This email alert system sends an automatic notification when the selected SLURM job is complete. 
+
+To subscribe to the email alert, run: 
+```bash
+watcloud subscription <job_id> <email>
+```
+
+An example email is shown below: 
+
+<img src="/email.png" width="500" height="135" />
+
+This is reachable when SSH'd into a SLURM login node. Currently, only one subscription can be made per job ID. 
+
 ### CVMFS
 
 CVMFS (CernVM File System)[^cvmfs] is a software distribution system that is widely adopted in the HPC community.
