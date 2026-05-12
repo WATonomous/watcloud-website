@@ -98,6 +98,11 @@
             "name": "blog-vllm-square",
             "uri": "watcloud://v1/sha256:c6ab96a63d928391a73c9e7ce9eb5f770116215f3f117d41f6396a86ccc56304?name=ChatGPT%20Image%20May%2029%2C%202025%2C%2011_20_07%20AM.png",
             "optimize": true
+        }, 
+        {
+            "name": "compute-cluster-notifier-email", 
+            "uri": "watcloud://v1/sha256:8c5ca0dcc51a32bc60369032d9351eae78ec82cb0538ccc3c28b05414718f648?name=image.png",
+            "optimize": true
         }
     ],
     "svgs": [

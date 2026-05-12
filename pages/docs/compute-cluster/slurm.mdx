@@ -1,3 +1,6 @@
+import { ComputeClusterNotifierEmail } from '@/build/fixtures/images'
+import Picture from '@/components/picture'
+
 # SLURM
 
 SLURM (Simple Linux Utility for Resource Management)[^slurm] is an open-source job scheduler that handles the allocation of resources in a compute cluster.
@@ -549,14 +552,15 @@ This email alert system sends an automatic notification when the selected SLURM 
 
 To subscribe to the email alert, run: 
 ```bash
-watcloud subscription <job_id> <email>
+./watcloud subscription <job_id> <email>
 ```
 
 An example email is shown below: 
+<div style={{ width: 500 }}>
+  <Picture image={ComputeClusterNotifierEmail} alt="Example job completion email notification" />
+</div>
 
-<img src="/email.png" width="500" height="135" />
-
-This is reachable when SSH'd into a SLURM login node. Currently, only one subscription can be made per job ID. 
+This is reachable when SSH'd into a SLURM login node.
 
 ### CVMFS
 
