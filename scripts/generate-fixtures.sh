@@ -66,6 +66,30 @@ if [ -n "$__fetch_from" ]; then
     wget --no-verbose -O "$PROJECT_DIR/build/fixtures/user-profiles.json" "$__fetch_from/user-profiles.json"
 else
     echo "Generating fixtures..."
+
+    # In shallow clones (e.g. `gh repo clone -- --depth 1`), or when cloning
+    # the public mirror — which does not contain the `data` branch — the
+    # `origin/data` ref may be missing locally. Try to fetch it on demand,
+    # and fall back to an actionable error if it is unavailable.
+    if ! git rev-parse --verify --quiet refs/remotes/origin/data >/dev/null; then
+        echo "origin/data not found locally; fetching..."
+        if ! git fetch --depth=1 origin data:refs/remotes/origin/data; then
+            cat >&2 <<EOF
+
+ERROR: Unable to find the 'data' branch on origin.
+
+The 'data' branch lives in the internal monorepo and is not mirrored to the
+public repo. To generate fixtures from a public source instead, re-run with
+FETCH_FIXTURES_FROM set (or pass --fetch-from). For example:
+
+    FETCH_FIXTURES_FROM=https://cloud.watonomous.ca/fixtures npm run generate-fixtures
+
+See README.md for details.
+EOF
+            exit 1
+        fi
+    fi
+
     # Create a new worktree
     git worktree add "$PROJECT_DIR/build/data" origin/data
     # Generate fixtures
