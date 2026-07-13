@@ -31,7 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "./ui/checkbox";
-import { ariaDescribedByIds, toPathSchema } from "@rjsf/utils";
+import { ariaDescribedByIds, toPathSchema, RJSFValidationError } from "@rjsf/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { CopyableCode } from "@/components/ui/copy-button";
 import { Textarea } from "@/components/ui/textarea";
@@ -77,6 +77,15 @@ const validator = createPrecompiledValidator(
 
 function string_to_mdx(str: string) {
   return lookupStringMDX(userSchemaStrings, str);
+}
+
+function transformErrors(errors: RJSFValidationError[]) {
+  return errors.map((error) => {
+    if (error.name === "not" && error.property === ".discord.username") {
+      return { ...error, message: "This looks like an email address. Please enter your Discord username instead." };
+    }
+    return error;
+  });
 }
 
 function postprocessFormData(data: Record<string, unknown>) {
@@ -359,6 +368,7 @@ export default function OnboardingForm() {
         onSubmit={onSubmit}
         showErrorList={"bottom"}
         focusOnFirstError={true}
+        transformErrors={transformErrors}
         templates={RJSFTemplates}
         fields={RJSFFields}
         widgets={RJSFWidgets}
