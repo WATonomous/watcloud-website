@@ -555,6 +555,11 @@ To subscribe to the email alert, run:
 ./watcloud subscription <job_id> <email>
 ```
 
+To get notified on Discord instead, pass a webhook URL (create one in your Discord channel via **Edit Channel → Integrations → Webhooks → New Webhook → Copy Webhook URL**):
+```bash
+watcloud subscription <job_id> --discord <webhook_url>
+```
+
 An example email is shown below: 
 <div style={{ width: 500 }}>
   <Picture image={ComputeClusterNotifierEmail} alt="Example job completion email notification" />
