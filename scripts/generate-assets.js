@@ -51,12 +51,23 @@ const RESOLVER_URL_PREFIXES = [
     "https://rgw.watonomous.ca/asset-temp",
 ]
 
+const RESOLVE_ATTEMPTS = parseInt(process.env.ASSET_RESOLVE_ATTEMPTS || "3");
+const RESOLVE_TIMEOUT_MS = parseInt(process.env.ASSET_RESOLVE_TIMEOUT_MS || "15000");
+
 function extractSha256(str) {
     const sha256Match = str.match(/sha256:([a-f0-9]{64})/);
     if (!sha256Match) {
         throw new Error("Invalid string: does not contain a SHA-256 hash.");
     }
     return sha256Match[1];
+}
+
+// Node's happy-eyeballs connect failures throw an AggregateError with an empty message.
+function describeError(error, indent = "") {
+    const summary = [error.name, error.code, error.response && `HTTP ${error.response.status}`, error.message]
+        .filter(Boolean).join(" ") || String(error);
+    const causes = Array.isArray(error.errors) ? error.errors : [];
+    return [indent + summary, ...causes.map(e => describeError(e, indent + "  "))].join("\n");
 }
 
 class WATcloudURI extends URL {
@@ -75,18 +86,29 @@ class WATcloudURI extends URL {
     }
 
     async resolveToURL() {
-        const errors = [];
-        for (const prefix of RESOLVER_URL_PREFIXES) {
-            const r = `${prefix}/${this.sha256}`;
-            try {
-                await axiosInstance.head(r);
-                return r;
-            } catch (error) {
-                errors.push(error);
+        let errors = [];
+        for (let attempt = 1; attempt <= RESOLVE_ATTEMPTS; attempt++) {
+            errors = [];
+            for (const prefix of RESOLVER_URL_PREFIXES) {
+                const r = `${prefix}/${this.sha256}`;
+                try {
+                    await axiosInstance.head(r, { timeout: RESOLVE_TIMEOUT_MS });
+                    return r;
+                } catch (error) {
+                    errors.push(error);
+                }
             }
+
+            const answeredEverywhere = errors.every(e => e.response);
+            if (answeredEverywhere || attempt === RESOLVE_ATTEMPTS) {
+                break;
+            }
+            const delayMs = 1000 * attempt;
+            console.warn(`Could not reach the asset resolver for ${this} (attempt ${attempt}/${RESOLVE_ATTEMPTS}), retrying in ${delayMs}ms`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
         }
 
-        throw new Error(`Asset not found: ${this}. Errors:\n${errors.map(e => e.message).join("\n")}`);
+        throw new Error(`Asset not found: ${this}. Errors:\n${errors.map(e => describeError(e)).join("\n")}`);
     }
 }
 
