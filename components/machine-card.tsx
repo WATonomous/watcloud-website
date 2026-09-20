@@ -241,6 +241,19 @@ export function MachineCard({
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">RAM</dt>
                         <dd className="font-medium">{bytesToSize(parseInt(machine.memory_info["memory_total_kibibytes"] || "0") * 1024, 0)}</dd>
                     </div>
+                    {'tmpdisk_mib' in machine && typeof machine.tmpdisk_mib === 'number' ? (
+                        <div className="flex flex-col py-3 first:pt-0">
+                            <dt className="mb-1 text-gray-500 dark:text-gray-400">
+                                <Popover>
+                                    <span>Temporary Disk<PopoverTrigger><HelpCircle className="ml-1 mr-1 h-3 w-3 text-muted-foreground" /></PopoverTrigger></span>
+                                    <PopoverContent side="top">
+                                        <p>The total temporary disk capacity configured for SLURM jobs on this node. This is NOT the currently available space. See the <Link href="/docs/compute-cluster/slurm">SLURM guide</Link> for how to request temporary disk space.</p>
+                                    </PopoverContent>
+                                </Popover>
+                            </dt>
+                            <dd className="font-medium">{machine.tmpdisk_mib === 0 ? '0 GiB' : bytesToSize(machine.tmpdisk_mib * 1024 ** 2, 0)}</dd>
+                        </div>
+                    ) : undefined}
                     {'gpus' in machine && machine.gpus.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
                             <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.gpus.length, "GPU")}</dt>

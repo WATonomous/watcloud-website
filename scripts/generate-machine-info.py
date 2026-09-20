@@ -1,6 +1,7 @@
 import argparse
 import csv
 import json
+import re
 import yaml
 from pathlib import Path
 import sys
@@ -136,6 +137,17 @@ def get_lshw_info(data_path, host_name):
 
     return lshw_info
 
+def get_tmpdisk_mib(node_config):
+    """Read the configured schedulable tmpdisk capacity (MiB) from Gres."""
+    match = re.search(r"\bGres=([^\s\\]+)", node_config)
+    if match is None:
+        return None
+    for resource in match.group(1).split(","):
+        if resource.startswith("tmpdisk:"):
+            return int(resource.removeprefix("tmpdisk:"))
+    return None
+
+
 def generate_fixtures(data_path):
     host_config = get_host_config()
 
@@ -164,6 +176,9 @@ def generate_fixtures(data_path):
         if "slurmd_nodes" in group_names:
             slurmd_config = get_group_config(host, "slurmd_nodes")
             if slurmd_config["slurm_role"] == "compute":
+                tmpdisk_mib = get_tmpdisk_mib(slurmd_config.get("slurm_conf_node_string", ""))
+                if tmpdisk_mib is not None:
+                    properties["tmpdisk_mib"] = tmpdisk_mib
                 properties.update({
                     "cpu_info": get_cpu_info(data_path, name),
                     "memory_info": get_memory_info(data_path, name),
