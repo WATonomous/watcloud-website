@@ -137,6 +137,12 @@ def get_lshw_info(data_path, host_name):
 
     return lshw_info
 
+def get_kernel_version(data_path, host_name):
+    kernel_version_path = Path(data_path, "general", host_name, "kernel-version.log")
+    if not kernel_version_path.exists():
+        return None
+    return kernel_version_path.read_text().strip().split('\n', 1)[0]
+
 def get_tmpdisk_mib(node_config):
     """Read the configured schedulable tmpdisk capacity (MiB) from Gres."""
     match = re.search(r"\bGres=([^\s\\]+)", node_config)
@@ -185,6 +191,7 @@ def generate_fixtures(data_path):
                     "gpus": get_gpu_info(data_path, name),
                     "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
                     "lsb_release_info": get_lsb_release_info(data_path, name),
+                    "kernel_version": get_kernel_version(data_path, name),
                 })
                 slurm_compute_nodes.append(properties)
             elif slurmd_config["slurm_role"] == "login":
@@ -196,6 +203,7 @@ def generate_fixtures(data_path):
                     "gpus": get_gpu_info(data_path, name),
                     "hostnames": [r["name"] for n in host["networks"] for r in n.get("dns_records",[])],
                     "lsb_release_info": get_lsb_release_info(data_path, name),
+                    "kernel_version": get_kernel_version(data_path, name),
                     "ssh_host_keys": get_file_lines(data_path, name, "ssh-host-keys.log"),
                     "mounts_with_quotas": get_mounts_with_quotas(host),
                     "cpu_quota": login_nodes_config.get("cpu_quota"),

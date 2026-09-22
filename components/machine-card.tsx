@@ -220,6 +220,12 @@ export function MachineCard({
                             <dd className="font-medium">{machine.lsb_release_info['description']}</dd>
                         </div>
                     ) : undefined}
+                    {'kernel_version' in machine && machine.kernel_version ? (
+                        <div className="flex flex-col py-3 first:pt-0">
+                            <dt className="mb-1 text-gray-500 dark:text-gray-400">Kernel</dt>
+                            <dd className="font-medium">{machine.kernel_version}</dd>
+                        </div>
+                    ) : undefined}
                     <div className="flex flex-col py-3 first:pt-0">
                         <dt className="mb-1 text-gray-500 dark:text-gray-400">
                             <span>CPU</span>
