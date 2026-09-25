@@ -53,6 +53,8 @@ const RESOLVER_URL_PREFIXES = [
 
 const RESOLVE_ATTEMPTS = parseInt(process.env.ASSET_RESOLVE_ATTEMPTS || "3");
 const RESOLVE_TIMEOUT_MS = parseInt(process.env.ASSET_RESOLVE_TIMEOUT_MS || "15000");
+const DOWNLOAD_ATTEMPTS = parseInt(process.env.ASSET_DOWNLOAD_ATTEMPTS || "3");
+const DOWNLOAD_TIMEOUT_MS = parseInt(process.env.ASSET_DOWNLOAD_TIMEOUT_MS || "60000");
 
 function extractSha256(str) {
     const sha256Match = str.match(/sha256:([a-f0-9]{64})/);
@@ -68,6 +70,24 @@ function describeError(error, indent = "") {
         .filter(Boolean).join(" ") || String(error);
     const causes = Array.isArray(error.errors) ? error.errors : [];
     return [indent + summary, ...causes.map(e => describeError(e, indent + "  "))].join("\n");
+}
+
+// Retry network errors and 5xx; 4xx fails immediately.
+async function downloadAsset(url) {
+    for (let attempt = 1; ; attempt++) {
+        try {
+            const response = await axiosInstance.get(url, { responseType: 'arraybuffer', timeout: DOWNLOAD_TIMEOUT_MS });
+            return response.data;
+        } catch (error) {
+            const retryable = !error.response || error.response.status >= 500;
+            if (!retryable || attempt >= DOWNLOAD_ATTEMPTS) {
+                throw new Error(`Failed to download ${url} (attempt ${attempt}/${DOWNLOAD_ATTEMPTS}):\n${describeError(error, "  ")}`);
+            }
+            const delayMs = 1000 * attempt;
+            console.warn(`Failed to download ${url} (attempt ${attempt}/${DOWNLOAD_ATTEMPTS}): ${describeError(error).split("\n")[0]}; retrying in ${delayMs}ms`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
 }
 
 class WATcloudURI extends URL {
@@ -126,8 +146,7 @@ async function processImage(image, preprocessSteps = []) {
 
         const url = await imageURI.resolveToURL();
         console.log(`Downloading and processing ${image.name} from ${url}`);
-        const response = await axiosInstance.get(url, { responseType: 'arraybuffer' });
-        const buffer = response.data;
+        const buffer = await downloadAsset(url);
         const sha256Hash = sha256(Buffer.from(buffer));
         if (sha256Hash !== imageURI.sha256) {
             throw new Error(`SHA-256 hash mismatch for "${image.name}"! Expected ${imageURI.sha256}, got ${sha256Hash}`);
@@ -216,8 +235,7 @@ async function processSvg(svg) {
 
         const url = await svgURI.resolveToURL();
         console.log(`Downloading ${svg.name} from ${url}`);
-        const response = await axiosInstance.get(url, { responseType: 'arraybuffer' });
-        const buffer = response.data;
+        const buffer = await downloadAsset(url);
 
         if (sha256(buffer) !== svgURI.sha256) {
             throw new Error(`SHA-256 hash mismatch for "${svg.name}"! Expected ${svgURI.sha256}, got ${sha256(buffer)}`);
