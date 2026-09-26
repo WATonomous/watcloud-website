@@ -49,28 +49,51 @@ import { Code } from "nextra/components"
 import { Link } from "nextra-theme-docs"
 import { MachineInfo, websiteConfig } from '@/lib/data'
 import { hostnameSorter } from '@/lib/wato-utils'
+import { sshHostKeyFingerprint } from '@/lib/ssh-host-key'
 
-function CopyableCodeBlock({ content }: { content: string }) {
+function SshFingerprintRow({ publicKey }: { publicKey: string }) {
     const [copied, setCopied] = useState(false)
+    const [copyFailed, setCopyFailed] = useState(false)
+    const result = sshHostKeyFingerprint(publicKey)
+    if (!result) {
+        return <div className="py-1 text-sm text-muted-foreground">Fingerprint unavailable</div>
+    }
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(content)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+    const [keyType, fingerprint] = result.split(' ')
+    const label = keyType === 'ssh-dss' ? 'DSA'
+        : keyType.startsWith('ecdsa-') ? 'ECDSA'
+        : keyType.replace(/^ssh-/, '').toUpperCase()
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(fingerprint)
+            setCopyFailed(false)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        } catch {
+            setCopyFailed(true)
+        }
     }
 
     return (
-        <div className="relative group">
+        <div className="flex items-baseline gap-2 py-1">
+            <span className="w-16 shrink-0 py-1 text-xs font-medium leading-5 text-muted-foreground" title={keyType}>
+                {label}
+            </span>
+            <span className="min-w-0 flex-1 break-all py-1 font-mono text-xs leading-5">
+                {fingerprint}
+            </span>
             <button
+                type="button"
                 onClick={handleCopy}
-                className="absolute top-2 right-2 p-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Copy to clipboard"
+                className="shrink-0 self-start rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={copied ? 'Fingerprint copied' : `Copy ${label} fingerprint`}
+                title={copyFailed ? 'Could not copy. Select the fingerprint to copy manually.' : copied ? 'Copied' : 'Copy fingerprint'}
             >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
-            <pre className="rounded-md bg-gray-900 p-4 pr-12 text-sm text-gray-100 font-mono whitespace-pre overflow-x-auto">
-                {content}
-            </pre>
+            <span className="sr-only" role="status">
+                {copyFailed ? 'Could not copy. Select the fingerprint to copy manually.' : copied ? 'Fingerprint copied' : ''}
+            </span>
         </div>
     )
 }
@@ -294,9 +317,22 @@ export function MachineCard({
                     ) : undefined}
                     {'ssh_host_keys' in machine && machine.ssh_host_keys?.length ? (
                         <div className="flex flex-col py-3 first:pt-0">
-                            <dt className="mb-1 text-gray-500 dark:text-gray-400">{pluralize(machine.ssh_host_keys.length, "SSH Host Key")}</dt>
+                            <dt className="mb-1 flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                                SSH fingerprints
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <button type="button" aria-label="How to verify SSH fingerprints" className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                            <HelpCircle size={14} />
+                                        </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent side="top" className="text-sm">
+                                        Type yes on first connect only if SSH shows one of these fingerprints;
+                                        otherwise type no and contact the WATcloud team.
+                                    </PopoverContent>
+                                </Popover>
+                            </dt>
                             <dd>
-                                <CopyableCodeBlock content={machine.ssh_host_keys.join('\n')} />
+                                {machine.ssh_host_keys.map(key => <SshFingerprintRow key={key} publicKey={key} />)}
                             </dd>
                         </div>
                     ) : undefined}
