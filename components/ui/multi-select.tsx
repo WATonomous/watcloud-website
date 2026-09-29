@@ -1,3 +1,5 @@
+"use client"
+
 // This is a community component from the discussion here: https://github.com/shadcn-ui/ui/issues/66#issuecomment-1871652145
 // Derived from:
 // - https://github.com/hsuanyi-chou/shadcn-ui-expansions/blob/142585b92e5a2530a0c660b3d64ec1d7c7b796c3/components/ui/multiple-selector.tsx

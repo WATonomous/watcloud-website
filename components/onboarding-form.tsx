@@ -1,3 +1,5 @@
+'use client'
+
 import React from "react";
 import userSchemaJSON from "@/build/fixtures/user.schema.generated.json";
 import userSchemaValidate from "@/build/fixtures/user.schema.validate";
@@ -38,10 +40,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { debounce, deepSet, encryptUnixPassword, getDayjsRelative, encryptBcryptPassword, getObjectPaths, getValuesFromPath, isCryptFormat, isBcryptFormat } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { useRouter } from "next/router";
+import { SearchParamsProps, withSearchParams } from "@/components/with-search-params";
 import { encodeURI as b64EncodeURI, decode as b64Decode } from "js-base64";
+import { INITIAL_FORM_DATA_QUERY_PARAM } from "@/lib/onboarding-form";
 
-export const INITIAL_FORM_DATA_QUERY_PARAM = "initialformdatab64";
 export const EXPIRES_AT_QUERY_PARAM = "expires-at";
 const FORM_STATE_KEY = "onboarding-form-state";
 
@@ -117,15 +119,11 @@ function postprocessFormData(data: Record<string, unknown>) {
   return data;
 }
 
-export default function OnboardingForm() {
-  const { query, isReady } = useRouter();
+function OnboardingFormImpl({ searchParams }: SearchParamsProps) {
+  const isReady = searchParams !== null;
   // parse initial form data from query params
-  const expiresAtFromParam = Array.isArray(query[EXPIRES_AT_QUERY_PARAM])
-    ? query[EXPIRES_AT_QUERY_PARAM][0]
-    : query[EXPIRES_AT_QUERY_PARAM];
-  const initialFormDataB64FromParam = Array.isArray(query[INITIAL_FORM_DATA_QUERY_PARAM])
-    ? query[INITIAL_FORM_DATA_QUERY_PARAM][0]
-    : query[INITIAL_FORM_DATA_QUERY_PARAM];
+  const expiresAtFromParam = searchParams?.get(EXPIRES_AT_QUERY_PARAM) ?? undefined;
+  const initialFormDataB64FromParam = searchParams?.get(INITIAL_FORM_DATA_QUERY_PARAM) ?? undefined;
 
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
@@ -144,8 +142,7 @@ export default function OnboardingForm() {
   // https://reactrouter.com/en/main/hooks/use-blocker
   useEffect(() => {
     if (!isReady) {
-      // The router is not ready yet, so the query params are not available.
-      // https://github.com/vercel/next.js/discussions/11484#discussioncomment-356055
+      // The query params are not available yet (e.g. during static export).
       return;
     }
 
@@ -448,3 +445,6 @@ export default function OnboardingForm() {
     </div>
   );
 }
+
+const OnboardingForm = withSearchParams(OnboardingFormImpl);
+export default OnboardingForm;

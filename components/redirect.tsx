@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+'use client'
+
+import { useEffect, type JSX } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Redirect = ({
     to,

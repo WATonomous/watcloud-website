@@ -1,0 +1,20 @@
+/* Styles derived from https://github.com/shuding/nextra/blob/66798f8e7f92cca80f2d62d19f9db5667bcc62ef/docs/theme.config.tsx */
+.logo {
+  /* Override the height set on the svg element */
+  height: var(--nextra-navbar-height);
+  mask-image: linear-gradient(
+    60deg,
+    black 25%,
+    rgba(0, 0, 0, 0.2) 50%,
+    black 75%
+  );
+  mask-size: 400%;
+  mask-position: 0%;
+}
+
+.logo:hover {
+  mask-position: 100%;
+  transition:
+    mask-position 1s ease,
+    -webkit-mask-position 1s ease;
+}

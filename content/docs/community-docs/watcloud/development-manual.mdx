@@ -1,0 +1,436 @@
+---
+sidebarTitle: Development Manual
+---
+
+# WATcloud Development Manual
+
+This document is a collection of snippets and notes that are useful for the development process.
+It's not meant to be a complete guide, but rather a collection of useful information.
+This is similar to our [internal notes](https://github.com/WATonomous/infra-notes), except that
+all information here is non-sensitive. We will gradually migrate information from the internal notes to
+this document.
+
+This document is best read when cross-referenced with the code in the [infra-config](https://github.com/WATonomous/infra-config) repo.
+
+## Terminology
+
+We use the following terminology 
+
+- **Infrastructure**: The set of all hosts and services that we manage.
+- **Host**: A physical machine (bare-metal machine) or virtual machine (VM) that is managed by us. For example, our compute cluster is a set of hosts that are managed by us.
+- **Cluster**: A set of hosts that are managed together. For example, our compute cluster is a set of hosts that are managed together.
+- **User**: A person that is authorized to access our infrastructure. For example, a WATonomous member.
+- **Service**: Anything that we provide to our users. The compute cluster, VMs, GPUs, the CI pipeline, the Kubernetes cluster, the GitHub organization, the Google Workspace, etc. are all services.
+- **Directory**: The directory contains configurations for users and services. For example, `./directory/users` contains configurations for users and `./directory/hosts` contains configurations for hosts.
+- **Provisioning**: The process of setting up a service. For example, setting up a VM.
+- **Provisioner**: A tool that is used to provision a service. This can be low-level tools like Ansible or Terraform, or high-level tools like our GitHub provisioner and our Google Workspace provisioner.
+
+## General Guidelines
+
+- Read and understand the [WATcloud Guidelines](./guidelines) before starting development.
+- Pull-request early and often. We have a lot of safeguards and automation in place to help you follow best practices.
+  When CI is run, look out for automated comments on and pull requests against your PR!
+- When writing commit messages and pull requests, start with a title that describes the change in imperative mood (e.g. "Add", "Fix", "Update")[^commit-message-convention],
+  followed by more information in the body of the message. Use [linking keywords][linking-keywords] like `Resolves #<issue_number>` to automatically close issues.
+  For example:
+
+  ```markdown
+  Create status-page Sentry project
+
+  This commit introduces a new Sentry project for the [status page][sp].
+
+  Resolves #123
+
+  [sp]: https://github.com/WATonomous/status
+  ```
+
+[^commit-message-convention]: Derived from https://github.com/joelparkerhenderson/git-commit-message/blob/d5bcb65e263217bfe47d898c69f9c6c0dfd6d413/README.md
+
+[linking-keywords]: https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue
+
+## Getting Started
+
+Many provisioners require access to the cluster network.
+For simplicity, we will assume that you are using one of the [machines](/machines) in the cluster.
+
+Clone the `infra-config` repo:
+
+```bash copy
+git clone git@github.com:WATonomous/infra-config.git
+```
+
+Start the development container. `git fetch` helps to check if the provisioner is up to date with master:
+
+```bash copy
+git fetch \
+&& docker compose build provisioner \
+&& docker compose run --rm provisioner /bin/bash
+```
+
+From now on, all commands should be run from within the container.
+
+All provisioners in the `infra-config` repo have the same self-documenting interface:
+
+```bash
+./<provisioner>/provision.sh
+# or 
+./scripts/provision-<provisioner>.sh
+```
+
+For example, to run the GitHub provisioner:
+
+```bash copy
+./github/provision.sh # `github` is just an example, please replace it with the provisioner you are working with.
+```
+
+When you're done, please exit the container. The container (and stored secrets) will be destroyed automatically:
+
+```bash copy
+exit
+```
+
+## Secrets
+
+We manage secrets using [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html).
+All commands below should be run inside the provisioner development environment (see [Getting Started](#getting-started) above).
+
+### Authenticating with `ansible-vault`
+
+Before performing any encrypt/decrypt actions, authenticate with `ansible-vault`:
+
+```bash copy
+./scripts/ansible-vault-authenticate.sh
+```
+
+### Encrypting secrets using `ansible-vault`
+
+Add the output of the following command to `secrets/secrets.yml`:
+
+```bash copy
+printf "%s" 'super_s3cr3t_str1ng$$' | ./scripts/encrypt-secret.sh "name_of_secret"
+```
+
+### Decrypting secrets using `ansible-vault`
+
+Example:
+
+```bash copy
+./scripts/decrypt-secret.sh ansible_ssh_pass
+```
+
+## Provisioner Container
+
+The `provisioner` container is a development and provisioning environment with all the necessary tools installed.
+It is defined in `docker-compose.yml` and can be started with the following command:
+
+```bash copy
+docker compose run --rm provisioner /bin/bash
+```
+
+This section describes properties of the container and describes changes that can be made to it.
+
+### Read-Only Filesystem
+
+The `infra-config` directory is mounted as read-only in the container, with a few exceptions as described in `docker-compose.yml`.
+The read-only filesystem is useful for preventing accidental changes to the configuration during provisioning.
+However, sometimes we want to make changes from within the container.
+For example, we may want to allow a Terraform-based provisioner to update the dependency lock file.
+To make the filesystem writable, we can make the following changes to `docker-compose.yml`:
+
+```diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 0641ded10f..5290b02478 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -3,7 +3,7 @@ services:
+     build: .
+     image: ${COMPOSE_PROJECT_NAME:?A COMPOSE_PROJECT_NAME is required to prevent container collision}
+     volumes:
+-      - .:/infra-config:ro
++      - .:/infra-config:rw
+       # The output directory is mounted as rw so that the provisioner can write
+       # to it.
+       - ./outputs:/infra-config/outputs:rw
+```
+
+### Caching
+
+We use GitHub Container Registry to cache the provisioner Docker image[^caching-details].
+The cache is used to speed up both [CI](https://github.com/WATonomous/infra-config/pull/3170)
+and [local development](https://github.com/WATonomous/infra-config/pull/3175).
+
+The cache is automatically used. Without any changes, the following command should complete quickly[^build-time-with-cache]
+and show that almost every stage is loaded from the cache:
+
+```bash copy
+docker compose build provisioner
+```
+
+Previously, there was a [cache invalidation issue](https://github.com/WATonomous/infra-config/pull/3176) when files in
+the build context don't have the same permissions as the cache[^git-docker-permission-difference].
+This issue has been fixed using a [workaround](https://github.com/WATonomous/infra-config/pull/3179).
+
+[^caching-details]: [Here](https://github.com/WATonomous/infra-config/blob/121af9af1dbe78e187670163545fa6537a26757f/.github/workflows/push-images.yml#L62) is where we push the cache, and [here](https://github.com/WATonomous/infra-config/blob/121af9af1dbe78e187670163545fa6537a26757f/docker-compose.yml#L5-L6) is where we use it. The cache lives [here](https://github.com/WATonomous/infra-config/pkgs/container/infra-config).
+
+[^build-time-with-cache]: At the time of writing (2024-09-16), the build time with cache is about 30 seconds on a single core (Docker immediately recognizes that every layer can be cached, and downloads the image from the cache). The build time without cache is about 3 minutes and 40 seconds on 8 cores.
+
+[^git-docker-permission-difference]: Git and Docker handle file permissions differently. Git [only preserves the executable bit](https://stackoverflow.com/a/3211396/4527337) of files, and uses the umask ([defaults to `022`](https://man7.org/linux/man-pages/man2/umask.2.html) on most systems) to determine the permissions of the files it creates. Docker, on the other hand, [uses all permission bits](https://docs.docker.com/engine/reference/builder/#copy) when using `COPY` or `ADD`.
+
+
+### Port forwarding
+
+Sometimes, we may need to access services running in the container from the host machine.
+For example, we may want to forward a Kubernetes service to the host machine for debugging.
+To forward a port from the container to the host machine, we can make the following changes to `docker-compose.yml`:
+
+```diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 0641ded10f..42300307d2 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -13,6 +13,8 @@ services:
+     working_dir: /infra-config
+     environment:
+       DRY_RUN: ${DRY_RUN:-}
++    ports:
++      - "1234:5678"
+     dns:
+       # In case the host's DNS is not working
+       - 1.1.1.1
+```
+
+The above configuration forwards port `5678` in the container to port `1234` on the host machine.
+Then we can run the following command to start the container:
+
+```bash copy
+docker compose run --rm --service-ports provisioner /bin/bash
+```
+
+Note that the `--service-ports` flag is required to forward the ports when using `docker compose run`[^docker-compose-run-service-ports].
+Also note that the host port range is shared between all users on the machine, and the command above may silently fail if the port is already in use.
+In that case, you can simply choose a different port.
+
+Then, from within the container, we can start any service on port `5678` to have it accessible on the host machine on port `1234`.
+For example, to start a simple HTTP server to serve files from the `outputs` directory:
+
+```bash copy
+npx serve -l 5678 ./outputs
+```
+
+Now, we can access the HTTP server from the host machine by visiting `http://localhost:1234` (e.g. `curl http://localhost:1234`).
+
+As a practical example, we can forward the Prometheus service running in the Kubernetes cluster:
+
+```bash copy
+./kubernetes/run.sh kubectl port-forward -n prometheus --address 0.0.0.0 service/prometheus-kube-prometheus-prometheus 5678:9090
+```
+
+[^docker-compose-run-service-ports]: https://docs.docker.com/compose/reference/run/#options
+
+## Ansible
+
+### Developing Ansible Roles
+
+Occasionally, we may need to develop new Ansible roles or fork existing ones to fix bugs or add features.
+A list of existing roles can be found by [searching for `ansible-role-` on GitHub](https://github.com/WATonomous?q=ansible-role-&type=all&language=&sort=).
+
+To develop a role, we can clone the role locally and mount it into our development environment.
+For example, to develop [ansible-role-microk8s](https://github.com/WATonomous/ansible-role-microk8s),
+we do the following:
+
+```bash copy
+# Clone the role alongside the infra-config repo
+git clone git@github.com:WATonomous/infra-config.git
+git clone git@github.com:WATonomous/ansible-role-microk8s.git
+```
+
+The resulting folder structure should look like this:
+
+import { FileTree } from 'nextra/components'
+
+<FileTree>
+  <FileTree.Folder name="infra-config" defaultOpen>
+    <FileTree.File name="docker-compose.yml" />
+    <FileTree.File name="ansible-galaxy-requirements.yml" />
+    <FileTree.File name="... other files" />
+  </FileTree.Folder>
+  <FileTree.Folder name="ansible-role-microk8s" />
+</FileTree>
+
+We will work in the `infra-config` directory:
+
+```bash copy
+cd infra-config
+```
+
+We can mount the role into our development environment by making the following changes to `docker-compose.yml`:
+
+```ansi
+[0;1mdiff --git a/docker-compose.yml b/docker-compose.yml[0m
+[0;1mindex 30e581dab..cc9b34874 100644[0m
+[0;1m--- a/docker-compose.yml[0m
+[0;1m+++ b/docker-compose.yml[0m
+[0;36m@@ -8,6 +8,7 @@[0m services:
+       # The output directory is mounted as rw so that the provisioner can write
+       # to it.
+       - ./outputs:/infra-config/outputs:rw
+[0;32m+      - ../ansible-role-microk8s:/root/.ansible/roles/watonomous.microk8s:ro[0m
+     tmpfs:
+       - /run:exec
+       - /tmp:exec
+```
+
+Now, when we run the provisioner, it will use the local copy of the role instead of the one installed by Ansible Galaxy.
+
+After we're done developing the role, we can remove the mount from `docker-compose.yml` and submit a PR to the role's repo. Once the PR is merged, we can update the role version in `ansible-galaxy-requirements.yml` and remove the local copy of the role.
+
+For most custom roles, we simply use the commit hash as the version. Ansible Galaxy will automatically
+download the role from GitHub using the commit hash. So updating the role version in `ansible-galaxy-requirements.yml` is
+as simple as:
+
+```ansi
+[0;1mdiff --git a/ansible/ansible-galaxy-requirements.yml b/ansible/ansible-galaxy-requirements.yml[0m
+[0;1mindex cdf321adf..b2ba4c1ec 100644[0m
+[0;1m--- a/ansible/ansible-galaxy-requirements.yml[0m
+[0;1m+++ b/ansible/ansible-galaxy-requirements.yml[0m
+[0;36m@@ -24,7 +24,7 @@[0m roles:
+     version: 7854b75566d7cb3f41009f83a3ceee93c2890262
+   - name: watonomous.microk8s
+     src: git+https://github.com/WATonomous/ansible-role-microk8s
+[0;31m-    version: dfe4a5c92207d08462b6f206cd7b42010b34fa38[0m
+[0;32m+    version: d544a16cbde82bd7457a8d498215ad78e6a689d0[0m
+   - name: geerlingguy.filebeat
+     src: git+https://github.com/geerlingguy/ansible-role-filebeat
+     version: 407a4c3cd31cc8f9c485b9177fb7287e71745efb
+```
+
+## Terraform
+
+### Developing Terraform Providers
+
+We use Terraform providers extensively in our provisioners.
+Sometimes, we may need to develop new Terraform providers or fork existing ones to fix bugs or add features.
+This section describes how to develop Terraform providers.
+
+We will use the [Discord Provider](https://github.com/WATonomous/terraform-provider-discord) as an example.
+
+```bash copy
+# Clone the provider alongside the infra-config repo
+git clone git@github.com:WATonomous/infra-config.git
+git clone git@github.com:WATonomous/terraform-provider-discord.git
+```
+
+The resulting folder structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="infra-config" defaultOpen>
+    <FileTree.File name="docker-compose.yml" />
+    <FileTree.File name="... other files" />
+  </FileTree.Folder>
+  <FileTree.Folder name="terraform-provider-discord" />
+</FileTree>
+
+Prepare two terminal windows. In one terminal, we will build the provider binary:
+
+```bash copy
+cd terraform-provider-discord
+go build -o terraform-provider-discord
+```
+
+The above command creates a `terraform-provider-discord` binary that we will use later.
+
+In another terminal, we will work in the `infra-config` directory:
+
+```bash copy
+cd infra-config
+```
+
+We can mount the provider into our development environment by making the following changes to `docker-compose.yml`:
+
+```diff
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 7b282d9b45..62e684128c 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -7,6 +7,7 @@ services:
+       # The output directory is mounted as rw so that the provisioner can write
+       # to it.
+       - ./outputs:/infra-config/outputs:rw
++      - ../terraform-provider-discord:/tf-dev/discord
+     tmpfs:
+       - /run:exec
+       - /tmp:exec
+```
+
+Start the development container as usual:
+
+```bash copy
+git fetch \
+&& docker compose build provisioner \
+&& docker compose run --rm provisioner /bin/bash
+```
+
+In the container, create `~/.terraformrc` with the following content:
+
+```ini filename="~/.terraformrc" {3} copy
+provider_installation {
+  dev_overrides {
+    "terraform.local/local/discord" = "/tf-dev/discord"
+  }
+
+  filesystem_mirror {
+    path    = "/usr/share/terraform/plugins"
+    include = ["terraform.local/*/*"]
+  }
+
+  direct {
+    exclude = ["terraform.local/*/*"]
+  }
+}
+```
+
+Note that `terraform.local/local/discord` is the provider's `source` in the `required_providers` block in the Terraform configuration
+and `/tf-dev/discord` is the path we mounted the provider to.
+
+The above configuration tells Terraform to search for a `/tf-dev/discord/terraform-provider-discord` binary when the `discord` provider is required,
+instead of using a provider installed in `/usr/share/terraform/plugins` or downloaded from the registry.
+
+Now, we can run the provisioner as usual. Terraform will use the local provider binary instead of the one installed in the container.
+
+```bash copy
+./discord/provision.sh
+```
+
+#### References
+- https://discuss.hashicorp.com/t/development-overrides-for-providers-under-development/18888/2
+- https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers
+
+## Quirks
+
+This section documents various quirks and workarounds that you might encounter while working with our infrastructure.
+
+### `wato-drive2` does not come up after reboot
+
+If `wato-drive2` does not automatically come up (`/dev/mapper/wato--drive2--vg-wato--drive2--lv--main` does not exist on `wato-rayside1`) after a reboot, run the following command on `wato-rayside1` to activate the logical volume:
+
+```bash copy
+lvchange -ay wato-drive2-vg/wato-drive2-lv-main
+```
+
+> Note: This command may take a few minutes to complete.
+
+Verify the status using the command:
+
+```bash copy
+lsblk
+```
+
+where you should see:
+
+```
+root@wato-rayside1:~# lsblk
+NAME                                                                                                  MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda                                                                                                     8:0    0  43.7T  0 disk
+└─wato--drive2--vg-wato--drive2--lv--main_wcorig                                                      253:8    0  43.6T  0 lvm
+```
+

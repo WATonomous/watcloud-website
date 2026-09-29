@@ -1,3 +1,5 @@
+"use client"
+
 import affiliationSchemaJSON from "@/build/fixtures/affiliation.schema.json";
 import affiliationSchemaValidate from "@/build/fixtures/affiliation.schema.validate";
 import RJSFFields from "@/components/rjsf-fields";

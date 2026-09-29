@@ -1,3 +1,5 @@
+"use client"
+
 import Giscus from "@giscus/react";
 import websiteConfig from "@/build/fixtures/website-config.json";
 import { useTheme } from "nextra-theme-docs";

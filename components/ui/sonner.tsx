@@ -1,3 +1,5 @@
+"use client"
+
 import { useTheme } from "nextra-theme-docs"
 import { Toaster as Sonner } from "sonner"
 

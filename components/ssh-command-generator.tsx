@@ -1,5 +1,7 @@
+'use client'
+
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { useRouter } from 'next/router'
+import { SearchParamsProps, withSearchParams } from '@/components/with-search-params'
 import { Pre, Code } from 'nextra/components'
 import stripIndent from 'strip-indent';
 import {
@@ -15,11 +17,8 @@ import { Input } from "@/components/ui/input"
 import { lookupStringMDX, sshInfo, sshInfoStrings } from '@/lib/data'
 import { htmlEncode } from '@/lib/utils'
 
-export function SSHCommandGenerator() {
-    const router = useRouter()
-    const queryMachineName = Array.isArray(router.query.machinename)
-      ? router.query.machinename[0]
-      : router.query.machinename || "";
+function SSHCommandGeneratorImpl({ searchParams }: SearchParamsProps) {
+    const queryMachineName = searchParams?.get("machinename") || "";
 
     const instructionsRef = useRef<HTMLDivElement>(null)
     const machineNames = Object.keys(sshInfo) as (keyof typeof sshInfo)[]
@@ -168,3 +167,5 @@ export function SSHCommandGenerator() {
         </>
     )
 }
+
+export const SSHCommandGenerator = withSearchParams(SSHCommandGeneratorImpl);

@@ -1,3 +1,5 @@
+'use client'
+
 import Uppy from '@uppy/core';
 import { Dashboard } from '@uppy/react';
 import AwsS3 from '@uppy/aws-s3';

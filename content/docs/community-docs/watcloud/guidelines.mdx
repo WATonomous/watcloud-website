@@ -1,0 +1,173 @@
+---
+sidebarTitle: Guidelines
+---
+
+# WATcloud Guidelines
+
+WATcloud is a student-run organization.
+The guaranteed turnover of team members as they graduate poses unique challenges in terms of
+cluster maintenance and making progress.
+Because of this, we've developed a set of guidelines to ensure that the knowledge of the team is
+passed down effectively and that the quality of service is maintained.
+
+This document outlines guidelines that every WATcloud team member should follow,
+to maximize the learning of team members and to ensure the highest quality of service for users.
+
+We divide our guidelines into two categories: technical—to address the maintainability of our systems,
+and organizational—to encourage team members to maintain a fast-paced and productive environment amidst
+internal and external bureaucratic challenges.
+
+import { Steps } from 'nextra/components'
+
+## Technical Guidelines
+
+The central tenet of our technical guidelines is that everything we do must be trivially maintainable.
+This means that with little guidance, a resourceful team member[^resourceful] should be able to understand
+and maintain the systems we build and deploy, even if the original author is no longer with the team.
+
+The following are a set of guidelines to strive for in our technical work:
+
+[^resourceful]: A resourceful team member is one who is willing to learn and is able to find the information they need to solve a problem.
+    Most of the time, this boils down to being good at Googling.
+
+<Steps>
+### Simplify everything
+
+Complexity is the enemy of maintainability.
+We should strive to make everything as simple as possible.
+For example, we follow the principle of having a single source of truth[^ssot] by having a single [status page](https://status.watonomous.ca/)
+that displays the status of all our services, and a single [provisioner interface](./development-manual#getting-started) for provisioning
+different types of resources.
+
+[^ssot]: Single source of truth (SSOT) is a principle that states that every piece of data should be stored in only one place.
+    This reduces the likelihood of data inconsistencies and makes it easier to maintain the data.
+    See [Wikipedia](https://en.wikipedia.org/wiki/Single_source_of_truth) for more information.
+
+### Only host services that are necessary and easy to maintain
+
+If we host something, it is inevitable that it will go down once in a while[^best-code-is-no-code].
+We should only host services if the value they provide is worth the maintenance burden.
+
+Some common red flags that a service is not worth hosting are:
+- Static websites (use GitHub Pages)
+- Services that have hosted alternatives (commercial services usually have free plans for open-source projects/non-profit organizations, e.g. Sentry, Elastic)
+- Services that have unnecessary runtime complexity (e.g. services that call an API to retrieve information, when the information can be bundled with the service during building/deployment)
+
+[^best-code-is-no-code]: As the saying goes, "The best code is no code at all."
+
+### Version-control everything
+
+All code, configuration, and documentation should be version-controlled.
+Achieving 100% infrastructure-as-code[^iac] is impossible because we work with physical hardware, but we should strive for it as much as possible.
+In cases where manual changes are necessary, they should be documented extensively.
+
+[^iac]: IaC, [1](https://www.redhat.com/en/topics/automation/what-is-infrastructure-as-code-iac), [2](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/infrastructure-as-code)
+
+### Make sure everything is reproducible
+
+If a service goes down, we should be able to bring it back up with minimal effort.
+This means that all dependencies should be documented (either as code or as documentation) and that the deployment process should be reasonably automated.
+
+### Healthcheck everything
+
+WATcloud has a lot of [observability](./observability) infrastructure in place to detect issues before they become problems.
+Every service should be monitored, and alerts should be set up to notify us when something goes wrong.
+
+### Communicate accurately
+
+Communication, especially technical, should be accurate, as it can be very misleading if it is incorrect.
+For example:
+- `MB` (megabytes—$10^6$ bytes or $2^{20}$ bytes, depending on the context) is not the same as `Mb` (megabits—$10^6$ bits or $2^{20}$ bits, depending on the context) or `mb` (even more ambiguous, could be anything).
+- Use `MiB` instead of `MB` whenever you know for sure that you are referring to the IEC[^iec] mebibytes ($2^{20}$ bytes) instead of the SI[^si] megabytes ($10^6$ bytes).
+
+[^iec]: The International Electrotechnical Commission (IEC) defines binary prefixes "kibi", "mebi", "gibi", etc., to refer to powers of 2.
+[^si]: The International System of Units (SI) defines prefixes "kilo", "mega", "giga", etc., to refer to powers of 10. However, in computing, these prefixes are often used to refer to powers of 2.
+
+Brand/organization names should also be capitalized correctly. For example:
+- Use `WATcloud` or `watcloud` instead of `WATCloud`, `WatCloud`, or `Watcloud`.
+- Use `WATonomous` or `watonomous` instead of `Watonomous`.
+
+</Steps>
+
+## Organizational Guidelines
+
+Student life is busy, and it can be difficult to balance the demands of school/work, the team, and personal life.
+The following are a set of guidelines to help team members maintain a fast-paced and productive environment:
+
+<Steps>
+
+
+### Iterate quickly
+
+Most of WATcloud's projects go through many iterations before they are sufficiently polished for production.
+Embrace the concept of rapid prototyping.
+Start with a minimum viable product (MVP) and iterate quickly and often based on feedback (from users, team members, or your future self).
+This approach allows us to quickly identify what works and what doesn't, and to pivot as necessary.
+
+### Proactively firefight
+
+The term "fire" is a metaphor for an urgent issue that needs to be resolved immediately.
+The term "firefighting" refers to the act of resolving these issues.
+Firefighting is an unavoidable part of maintaining services like ones that WATcloud provides.
+Some common causes of fires are:
+- Power outages
+- Hardware failures
+- Software bugs
+
+During development, follow the [technical guidelines](#technical-guidelines) to reduce the likelihood of fires.
+When something goes wrong, it's important to act quickly to minimize the impact on users.
+After issues are resolved, we should conduct a post-mortem to understand and document what went wrong and how we can prevent it from happening again.
+
+### Minimize bureaucracy
+
+Bureaucracy is the enemy of productivity.
+At WATcloud, we strive to minimize bureaucracy as much as possible.
+This means that we should avoid unnecessary hierarchies and hiding of information.
+
+Sometimes, external bureaucracy is unavoidable.
+For example, we have to follow the university's process for purchasing using the team's funds.
+In these cases, we should try to be as efficient as possible to achieve our goals.
+For example, oftentimes, we need to experiment with different products to find the best ones for our needs,
+and potentially return the products that don't meet our requirements.
+Instead of asking the university to purchase on our behalf, we can purchase the products ourselves and get reimbursed
+for the products that we decide to keep.
+
+### Be scrappy
+
+Sometimes, we'll need to work within constraints that are not ideal.
+In these cases, it's helpful to adopt a "hacker mentality" and find creative solutions to problems.
+For example, since the beginning, a major constraint for WATcloud has been the budget.
+Historically, instead of getting set-and-forget hardware that is expensive,
+we worked very hard to minimize costs by opting for consumer-grade hardware and
+using lots of healthchecks to ensure that the hardware is running as expected.
+
+The same applies when your work depends on other people's work.
+If you need a work-in-progress feature to be completed before you can start your work,
+find a way to work on something else in the meantime.
+It's almost always possible to divide work into smaller pieces that can be worked on independently.
+Being blocked on someone else's work shouldn't be an excuse to stop working.
+
+### Move fast and break things
+
+At WATcloud, we embrace the motto "Move fast and break things" to encourage risk-taking and experimentation.
+Making mistakes is a natural part of the learning process, and as long as we also move fast to fix what we break,
+we can turn those mistakes into opportunities for improvement.
+This philosophy complements our [technical guidelines](#technical-guidelines), which prioritize trivially maintainable systems.
+
+With comprehensive observability, a dedication to infrastructure-as-code, and a commitment to minimize and document manual changes,
+we are equipped to quickly identify and resolve issues as they arise.
+
+### Establish Boundaries
+
+WATcloud is committed to delivering high-quality, maintainable systems.
+To ensure that everything we release is well-supported, we must consider the implications of each new feature.
+Our capacity to [address urgent issues](#proactively-firefight) is not unlimited, thus prioritization is essential.
+Often, our role is to provide a robust interface on which users can build.
+
+For instance, our [SSH access instructions](/docs/compute-cluster/ssh) include reliable one-liner commands that work consistently.
+However, configuration of SSH and agent forwarding—which vary based on the user's operating system and SSH agent—are left to the user.
+For these more personalized setups, we direct users to the extensive resources available online.
+
+</Steps>
+
+

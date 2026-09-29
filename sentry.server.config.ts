@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { websiteConfig } from '@/lib/data'
+import websiteConfig from '@/build/fixtures/website-config.json'
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({

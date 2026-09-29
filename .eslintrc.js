@@ -12,14 +12,5 @@ module.exports = {
   ],
   "rules": {
     "react/react-in-jsx-scope": "off",
-    "react/no-unknown-property": [
-      2,
-      {
-        "ignore": [
-          // Allows for <style jsx>
-          "jsx"
-        ]
-      }
-    ],
   }
 }

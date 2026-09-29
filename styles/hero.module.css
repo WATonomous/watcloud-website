@@ -58,3 +58,89 @@ a.cta-btn.secondary:hover {
     filter: brightness(0.95);
     box-shadow: 0 5px 30px -10px #ffffffab;
 }
+
+/* Hero layout, moved from styled-jsx in components/hero.tsx */
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    pointer-events: none;
+}
+@media screen and (max-width: 2000px) {
+    .hero-background {
+        background-position: left;
+    }
+}
+.hero {
+    position: relative;
+    z-index: 1;
+}
+.hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 90rem;
+    padding-left: max(env(safe-area-inset-left),1.5rem);
+    padding-right: max(env(safe-area-inset-right),2.5rem);
+    margin: 0 auto;
+}
+.hero-title {
+    display: inline-flex;
+    font-size: 3.125rem;
+    font-size: min(4.375rem, max(4.5vw, 2.5rem));
+    font-weight: 700;
+    font-feature-settings: initial;
+    letter-spacing: -.12rem;
+    margin-left: -0.2rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    line-height: 1.1;
+    background-image: linear-gradient(146deg,#000,#868b8e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-right: 2rem;
+}
+@media screen and (min-width: 1000px) and (max-width: 2000px) {
+    .hero-title {
+        max-width: 60%;
+        padding-right: 4rem;
+    }
+}
+@media screen and (min-width: 400px) and (max-width: 1000px) {
+    .hero-title {
+        max-width: 50%;
+        padding-right: 2rem;
+    }
+}
+.hero-subtitle {
+    font-size: 1.3rem;
+    font-size: min(1.3rem, max(2.5vw, 1.2rem));
+    font-feature-settings: initial;
+    line-height: 1.6;
+    margin-top: 1.5rem;
+    margin-right: 2rem;
+    color: #2a2a2a;
+    max-width: 80%;
+    display: block;
+    width: 100%;
+}
+@media screen and (min-width: 1000px) and (max-width: 2000px) {
+    .hero-subtitle {
+        max-width: 60%;
+    }
+}
+@media screen and (min-width: 400px) and (max-width: 1000px) {
+    .hero-subtitle {
+        max-width: 50%;
+    }
+}
+@media screen and (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+}

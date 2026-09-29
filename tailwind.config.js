@@ -2,10 +2,9 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,md,mdx}',
+    './content/**/*.{js,ts,jsx,tsx,md,mdx}',
     './components/**/*.{js,ts,jsx,tsx,md,mdx}',
     './app/**/*.{js,ts,jsx,tsx,md,mdx}',
-    './src/**/*.{js,ts,jsx,tsx,md,mdx}',
     './lib/**/*.{js,ts,jsx,tsx,md,mdx}',
     '*.{js,ts,jsx,tsx,md,mdx}',
   ],
@@ -75,6 +74,11 @@ module.exports = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
+  },
+  corePlugins: {
+    // Nextra 4 ships the Tailwind v4 preflight in its `v4-base` cascade layer. The v3 preflight
+    // would be unlayered and override all of Nextra's (layered) styles.
+    preflight: false,
   },
   plugins: [require("tailwindcss-animate")],
 }

@@ -1,0 +1,85 @@
+---
+title: "Introduction"
+---
+
+# WATcloud
+
+import { Link } from 'nextra-theme-docs'
+import websiteConfig from '@/build/fixtures/website-config.json'
+
+WATcloud is a student-run cloud infrastructure group at the University of Waterloo.
+Our main service is the [WATcloud compute cluster](/docs/compute-cluster) (sometimes referred to as "the compute cluster" or "WATcloud"),
+where we provide compute (CPU and GPU), storage, and networking resources to student teams, clubs, and labs at the university and partnering organizations.
+
+{/*
+TODO: Once we have the affiliation infrastructure set up, list the number of student teams we help, the number of FYDP groups, and the total number of users.
+We could list total users and the number of users in the past term and the current term.
+*/}
+
+## Quickstart
+
+import { Cards } from 'nextra/components'
+import Picture from '@/components/picture'
+import {
+  ComputerDark,
+  ComputerLight,
+  RobotDark,
+  RobotLight,
+  CloudDark,
+  CloudLight,
+} from '@/build/fixtures/images'
+
+<Cards num={3}>
+  <Cards.Card arrow title="Get Access" href="/docs/compute-cluster/getting-access">
+    <span className="hidden dark:block"><Picture alt="Abstract Computer (Dark)" image={ComputerDark} /></span>
+    <span className="dark:hidden"><Picture alt="Abstract Computer (Light)" image={ComputerLight} /></span>
+  </Cards.Card>
+  <Cards.Card arrow title="View Specs" href="/machines">
+    <span className="hidden dark:block"><Picture alt="Robot with GPU (Dark)" image={RobotDark} /></span>
+    <span className="dark:hidden"><Picture alt="Robot with GPU (Light)" image={RobotLight} /></span>
+  </Cards.Card>
+  <Cards.Card arrow title="Get Involved" href="/get-involved">
+    <span className="hidden dark:block"><Picture alt="Constructing the Cloud (Dark)" image={CloudDark} /></span>
+    <span className="dark:hidden"><Picture alt="Constructing the Cloud (Light)" image={CloudLight} /></span>
+  </Cards.Card>
+</Cards>
+
+## Brief History
+
+WATcloud started as a group of computing enthusiasts who build servers at the [WATonomous][wato] student design team. Now we serve clubs
+and teams from all over the University of Waterloo and support collaborative projects with international schools like [MIT][mit],
+[Pitt][pitt], [RIT][rit], [CMU][cmu], and [PoliTO][polito][^international-collaboration].
+
+[^international-collaboration]: An example of an international group we support is MIT-PITT-RW (MPRW), a collaboration between UWaterloo,
+MIT, Pitt, and RIT to build a full-size self-driving racecar. UWaterloo students work alongside our international collaborators to use the
+WATcloud compute cluster to develop software, run simulations, and train ML models.
+
+[wato]: https://watonomous.ca
+[mit]: https://mit.edu
+[pitt]: https://pitt.edu
+[rit]: https://rit.edu
+[cmu]: https://cmu.edu
+[polito]: https://www.polito.it/
+
+
+## Join Our Community
+For real-time server status updates and getting help, join us in our <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord server</Link>. And stay tuned for our upcoming workshops and training sessions!
+
+## FAQ
+
+### Is the compute cluster free to use?
+
+Absolutely! We're a student-run group, and we don't charge for our infrastructure. However, we do have a limited amount of resources, so we ask that you use them responsibly.
+
+### How do I get access to the compute cluster?
+
+Please visit the [Getting Access](/docs/compute-cluster/getting-access) page for more information.
+
+### What’s the relationship between WATcloud and WATonomous?
+
+WATonomous' compute cluster was born to meet the needs of the team. As the team grew, so did the cluster. Eventually, the subteam responsible for the cluster
+became WATcloud, and opened up the cluster up to other groups. Now, WATcloud and WATonomous operate akin to AWS and Amazon.
+We work in close proximity (e.g. we share the same Discord server and Google Workspace), but the services we provide are tailored to all groups we support.
+WATonomous has access to the same [support resources](/docs/compute-cluster/support-resources) as every other group.
+
+

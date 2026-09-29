@@ -1,3 +1,5 @@
+"use client"
+
 import { cn } from "@/lib/utils";
 import { SiX } from "@icons-pack/react-simple-icons";
 import { GithubIcon, GlobeIcon, LinkedinIcon, MailIcon } from "lucide-react";

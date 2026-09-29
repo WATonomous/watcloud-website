@@ -1,31 +1,29 @@
-import {
-    getPagesUnderRoute,
-} from "nextra/context";
+import { getPageMap } from "nextra/page-map";
 import { Cards } from "nextra/components";
 import { BookMarkedIcon } from "lucide-react";
 
-function PageIndex({
+async function PageIndex({
     pageRoot,
 }: {
     pageRoot: string;
 }) {
-    const pages = getPagesUnderRoute(pageRoot);
+    const pages = await getPageMap(pageRoot);
 
     return (
         <Cards>
             {
                 pages.map((page, i) => {
-                    // Skip directories with no index page
-                    if ((page as any).kind !== "MdxPage") return null;
+                    // Skip meta entries and directories with no index page
+                    if (!("route" in page) || ("children" in page && !("frontMatter" in page))) return null;
 
-                    const title = page.meta?.title || page.name;
+                    const title = ("title" in page && page.title) || page.name;
                     const route = page.route;
 
                     return (
                         <Cards.Card
                             key={i}
                             icon={<BookMarkedIcon />}
-                            title={title}
+                            title={String(title)}
                             href={route}
                         >{null}</Cards.Card>
                     );

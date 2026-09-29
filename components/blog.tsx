@@ -1,3 +1,5 @@
+'use client'
+
 import { allImages } from '@/build/fixtures/images';
 import {
     AlertDialog,
@@ -19,14 +21,13 @@ import {
 import { websiteConfig } from '@/lib/data';
 import { dayjsTz } from '@/lib/utils';
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from 'next/router';
-import { MdxFile } from "nextra";
+import { useRouter } from 'next/navigation';
 import { Link } from "nextra-theme-docs";
-import { getPagesUnderRoute } from "nextra/context";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Picture from "./picture";
+import { SearchParamsProps, withSearchParams } from "./with-search-params";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -44,57 +45,51 @@ export function BlogHeader() {
     );
 }
 
-export function BlogIndex() {
+export type BlogPostSummary = {
+    route: string;
+    name: string;
+    frontMatter: Record<string, any>;
+};
+
+function BlogIndexImpl({ posts, searchParams }: { posts: BlogPostSummary[] } & SearchParamsProps) {
     const router = useRouter();
-    const locale = router.locale || websiteConfig.default_locale;
-    const activeTag = (router.query.tag as string | undefined)?.trim();
+    const locale = websiteConfig.default_locale;
+    const activeTag = searchParams?.get('tag')?.trim();
     let tagCounts: Record<string, number> = {};
 
-    // Get all posts from route
-    const allPosts = getPagesUnderRoute("/blog").filter((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {};
+    const allPosts = posts.filter((page) => {
+        const frontMatter = page.frontMatter || {};
         // Get tag counts for the tag bar
         if (frontMatter.tags && Array.isArray(frontMatter.tags)) {
             frontMatter.tags.forEach((tag: string) => {
                 tagCounts[tag] = (tagCounts[tag] || 0) + 1;
             });
         }
-        if (frontMatter.hidden) {return null}
-        return frontMatter;
+        return !frontMatter.hidden;
     });
-    
-    // Redirect to main blog page if no tag specified or empty tag
-    // (but only after router is ready and we've attempted to parse the tag)
+
+    // Redirect to main blog page if the tag is specified but empty
     useEffect(() => {
-        if (router.isReady && !activeTag &&
-            (
-                !router.query.tag ||
-                (typeof router.query.tag === 'string' && router.query.tag.trim() === '') ||
-                !router.asPath.includes('?tag=') ||
-                router.asPath.includes('?tag=&') ||
-                router.asPath.endsWith('?tag=')
-            )
-        ) {
+        if (searchParams?.has('tag') && !activeTag) {
             router.push('/blog')
-        } // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.isReady, activeTag, router.query.tag, router.asPath])
-    // excluding router object from deps to prevent infinite loop (it changes on every navigation)
+        }
+    }, [router, searchParams, activeTag])
 
     // Redirect if tag has no posts
     useEffect(() => {
-        if (router.isReady && activeTag && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
+        if (activeTag && (!tagCounts[activeTag] || tagCounts[activeTag] === 0)) {
             router.push('/blog')
         } // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.isReady, activeTag])
-    // excluding router object from deps to prevent infinite loop (it changes on every navigation)
+    }, [router, activeTag])
+    // excluding tagCounts from deps because it is recomputed on every render
 
     // Filter blogs by tag and sort by date (newest first)
     const filteredPosts = allPosts.filter((page) => {
-            const frontMatter = (page as MdxFile).frontMatter || {};
+            const frontMatter = page.frontMatter || {};
             return !activeTag || frontMatter.tags && frontMatter.tags.includes(activeTag);
     }).sort((a, b) => {
-        const fmA = (a as MdxFile).frontMatter || {};
-        const fmB = (b as MdxFile).frontMatter || {};
+        const fmA = a.frontMatter || {};
+        const fmB = b.frontMatter || {};
         const timeA = fmA.date && fmA.timezone ? dayjsTz(fmA.date, fmA.timezone).valueOf() : 0;
         const timeB = fmB.date && fmB.timezone ? dayjsTz(fmB.date, fmB.timezone).valueOf() : 0;
         return timeB - timeA;
@@ -102,7 +97,7 @@ export function BlogIndex() {
     
     // Get blog info
     const items = filteredPosts.map((page) => {
-        const frontMatter = (page as MdxFile).frontMatter || {}
+        const frontMatter = page.frontMatter || {}
 
         const { date, timezone } = frontMatter
         const dateObj = date && timezone && dayjsTz(date, timezone).toDate()
@@ -161,7 +156,7 @@ export function BlogIndex() {
                     <div className="mb-4 md:hidden">{wideImageComponent}</div>
                     <div className="flex items-center">
                         <div>
-                            <h2 className="block font-semibold text-2xl">{page.meta?.title || frontMatter.title || page.name}</h2>
+                            <h2 className="block font-semibold text-2xl">{frontMatter.title || page.name}</h2>
                             <p className="opacity-80" style={{ marginTop: ".5rem" }}>
                                 {frontMatter.description}{" "}
                             </p>
@@ -223,6 +218,8 @@ export function BlogIndex() {
         </div>
     )
 }
+
+export const BlogIndexClient = withSearchParams(BlogIndexImpl);
 
 const subscribeFormSchema = z.object({
     email: z.string().email({

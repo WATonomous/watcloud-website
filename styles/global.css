@@ -1,4 +1,17 @@
-@tailwind base;
+/*
+  Nextra 4 ships its styles in cascade layers, and unlayered styles always take precedence over
+  layered ones. Tailwind v3's base (including its `*` defaults for `--tw-*` variables, which would
+  otherwise reset Nextra's utilities such as the navbar's backdrop blur) and our element defaults
+  are placed in Nextra's own `v4-base` layer: above Nextra's preflight, below its utilities.
+  Next.js doesn't guarantee that this file is loaded before Nextra's stylesheet, so repeat Nextra's
+  layer order here rather than introducing new layers whose position would depend on load order.
+*/
+@layer properties, theme, v4-base, components, v4-utilities;
+
+@layer v4-base {
+  @tailwind base;
+}
+
 @tailwind components;
 @tailwind utilities;
 
@@ -88,12 +101,12 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   body {
     @apply bg-background text-foreground !important;
+  }
+
+  * {
+    @apply border-border;
   }
 
   a {
@@ -101,7 +114,7 @@
   }
 }
 
-.nextra-nav-container {
+.nextra-navbar {
   /*
     Uppy uses a max z-index of 1005:
     https://github.com/transloadit/uppy/blob/68af8a3c0f96a0fc37f6b2aa844df81e6f218fb4/packages/%40uppy/core/src/_variables.scss#L50-L56
@@ -109,7 +122,7 @@
   z-index: 1020;
 }
 
-.form-description p._leading-7 {
+.form-description p.x\:leading-7 {
   /* Change the styling of generated MDX content that are embedded in forms */
   line-height: 1.375;
 }
@@ -135,14 +148,6 @@ textarea {
 }
 
 
-/* Fix margin issue for nested lists: https://github.com/shuding/nextra/issues/863#issuecomment-2068517369 */
-div>ul.first\:_mt-0:first-of-type,
-div>ol.first\:_mt-0:first-of-type,
-li>ul.first\:_mt-0:first-of-type,
-li>ol.first\:_mt-0:first-of-type {
-  margin-top: 0;
-}
-
 /*
 section.footnotes is created by the remark-gfm plugin:
 - https: //github.com/remarkjs/remark-gfm/blob/d8e110edf0799741e0954a92dd22fc143b803bdb/readme.md
@@ -153,8 +158,8 @@ section.footnotes {
 }
 
 /* Remove underlines from navigation and search result links */
-.nextra-sidebar-container a,
-.nextra-nav-container a,
+.nextra-sidebar a,
+.nextra-navbar a,
 .nextra-toc a,
 .nextra-search-results a {
   @apply no-underline hover:no-underline;

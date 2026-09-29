@@ -1,4 +1,6 @@
-import { createElement } from "react";
+"use client"
+
+import { createElement, type JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
