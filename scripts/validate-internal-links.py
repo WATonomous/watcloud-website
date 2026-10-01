@@ -8,7 +8,6 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
@@ -40,6 +39,10 @@ def is_internal_url(url):
     """Check if a URL is internal to the website."""
     return url.startswith(BASE_URL) or url.startswith(DEPLOYED_DOMAIN)
 
+def is_cloudflare_email_protection_url(url):
+    """Cloudflare rewrites email addresses to /cdn-cgi/l/email-protection. Ignoring these"""
+    return urlparse(url).path.startswith("/cdn-cgi/l/email-protection")
+
 def convert_deployed_domain_to_base(url):
     """Convert a URL from the deployed domain to the base URL."""
     if url.startswith(DEPLOYED_DOMAIN):
@@ -66,142 +69,127 @@ def get_xpath(element):
 
 def crawl_and_fetch_links(url):
     """Wrapper function for crawl_and_fetch_links."""
-    visited = set()
+    visited_pages = set()
+    page_info = {}
     internal_links_tuples = set() # (source, destination, xpath)
     external_links = set()
     def crawl(url):
         """Recursively fetch links from the given URL, separating internal and external links."""
+        global fail_build
+        url = convert_deployed_domain_to_base(url)
+        url = urlparse(url)._replace(fragment='').geturl()
+        if url in visited_pages:
+            return
+        # Mark before fetching so links back to this page cannot recurse forever.
+        visited_pages.add(url)
+
         try:
             response = session.get(url, timeout=DEFAULT_TIMEOUT)
         except requests.RequestException as e:
             print(f"Request for {url} failed: {e}")
-            global fail_build 
             fail_build = True
             return
 
+        if response.status_code != 200:
+            print(f"Request for {url} returned status code: {response.status_code}")
+            fail_build = True
+
         soup = BeautifulSoup(response.text, 'html.parser')
+        fragments = set()
+        for element in soup.find_all(id=True):
+            fragments.add(element['id'])
+
+        for element in soup.find_all(attrs={"name": True}):
+            fragments.add(element['name'])
+
+        page_info[url] = {
+            "status_code": response.status_code,
+            "fragments": fragments
+        }
         for a in soup.find_all('a', href=True):
             link = urljoin(url, a.get('href'))
-            if link not in visited:
-                visited.add(link)
+            if is_cloudflare_email_protection_url(link):
+                continue
+            if is_internal_url(link):
+                link = convert_deployed_domain_to_base(link)
                 xpath = get_xpath(a)
-                if is_internal_url(link):
-                    link = convert_deployed_domain_to_base(link)
-                    internal_links_tuples.add((url, link, xpath))
-                    # print(f"Found internal link: {link} from url: {url} at xpath path: {xpath}")
-                    link_without_fragment = urlparse(link)._replace(fragment='').geturl()
-                    crawl(link_without_fragment)
-                else:
-                    external_links.add(link)
-        return internal_links_tuples, external_links
-    return crawl(url)
+                internal_links_tuples.add((url, link, xpath))
+                crawl(link)
+            else:
+                external_links.add(link)
 
-def get_response_code(full_url) -> int:
-    """Check if a URL, including its fragment, is valid. 
-    Returns: The request status code if the link isn't valid
-    """
+    crawl(url)
+    return internal_links_tuples, external_links, page_info
+
+def get_response_code(full_url, page_info) -> int:
+    """Read a page's status code from crawler results"""
     # Parse the URL to separate it from the fragment
     parsed_url = urlparse(full_url)
     url = parsed_url._replace(fragment='').geturl()
 
-    try:
-        response = session.get(url, timeout=DEFAULT_TIMEOUT)
-        return response.status_code  
-    except requests.RequestException as e:
-        print(f"Request for {url} failed: {e}")
-        return -1  
+    info = page_info.get(url)
+    if info is None:
+        return -1
+    return info["status_code"]
 
-def check_fragment_validity(full_url) -> bool:
+def check_fragment_validity(full_url, page_info) -> bool:
     """Check if a fragment in a URL is valid."""
     parsed_url = urlparse(full_url)
-    fragment = parsed_url.fragment 
-    try:
-        response = session.get(parsed_url._replace(fragment='').geturl(), timeout=DEFAULT_TIMEOUT)
-    except requests.RequestException:
+    fragment = parsed_url.fragment
+
+    info = page_info.get(parsed_url._replace(fragment='').geturl())
+    if info is None:
         return False
-
-    # If there's a fragment, check if it corresponds to an id in the HTML
-    soup = BeautifulSoup(response.text, 'html.parser')
-    if soup.find(id=fragment) or soup.find_all(attrs={"name": fragment}):
-        return True # Fragment is valid
-
-    # Fragment not found
-    return False 
+    return fragment in info["fragments"]
 
 def link_has_fragment(full_url) -> bool:
     return urlparse(full_url).fragment != ''
 
-def validate_internal_links(internal_links_tuples):
-    """Check if internal links are valid in parallel."""
+def validate_internal_links(internal_links_tuples, page_info):
+    """Check if internal links point to pages that returned 200."""
     invalid_links = []
-
-    def check_link(link):
-        """Check if the link is valid."""
+    for link in internal_links_tuples:
         _, destination, _ = link
-        status_code = get_response_code(destination)
-        return (link, status_code) if status_code != 200 else None
-
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(check_link, link) for link in internal_links_tuples]
-        for future in as_completed(futures):
-            result = future.result()
-            if result:
-                invalid_links.append(result)
-
+        status_code = get_response_code(destination, page_info)
+        if status_code != 200:
+            invalid_links.append((link, status_code))
     return invalid_links
 
-def validate_internal_link_fragments(internal_links_tuples):
-    """Check if internal link fragments are valid in parallel."""
+def validate_internal_link_fragments(internal_links_tuples, page_info):
+    """Check if internal link fragments exist on their destination pages."""
     invalid_fragment_links = []
-
-    def check_fragment(link):
-        """Check if the fragment of the link is valid."""
+    for link in internal_links_tuples:
         _, destination, _ = link
-        if link_has_fragment(destination):
-            if not check_fragment_validity(destination):
-                return link
-        return None
-
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(check_fragment, link) for link in internal_links_tuples]
-        for future in as_completed(futures):
-            result = future.result()
-            if result:
-                invalid_fragment_links.append(result)
-
+        if link_has_fragment(destination) and not check_fragment_validity(destination, page_info):
+            invalid_fragment_links.append(link)
     return invalid_fragment_links
 
 if __name__ == '__main__':
     print("Collecting links...")
-    internal_links_tuples, external_links = crawl_and_fetch_links(BASE_URL)
+    internal_links_tuples, external_links, page_info = crawl_and_fetch_links(BASE_URL)
     print(f"Found {len(internal_links_tuples)} internal links")
     print(f"Found {len(external_links)} external links")
 
-    # Run the validation in parallel
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        validate_internal_links_future = executor.submit(validate_internal_links, internal_links_tuples)
-        validate_internal_fragments_future = executor.submit(validate_internal_link_fragments, internal_links_tuples)
-
-        # Wait for both validations to complete
-        invalid_internal_links = validate_internal_links_future.result()
-        invalid_fragment_links = validate_internal_fragments_future.result()
+    invalid_internal_links = validate_internal_links(internal_links_tuples, page_info)
+    invalid_fragment_links = validate_internal_link_fragments(internal_links_tuples, page_info)
 
     # Print the results
     if len(invalid_internal_links) == 0 and len(invalid_fragment_links) == 0 and not fail_build:
         print(f"All {len(internal_links_tuples)} internal links are valid.")
         sys.exit(0) # Exit with success
 
-    print("ERROR with the following internal links:")
-    for item in invalid_internal_links:
-        link = item[0]
-        status_code = item[1]
-        print(f"On page: {link[0]} \nto: {link[1]} \nwith XPath: {link[2]}")
-        print(f"Status code: {status_code} \n")
-    
-    for link in invalid_fragment_links:
-        print(f"On page: {link[0]} \nto: {link[1]} \nwith XPath: {link[2]}")
-        print(f"Fragment #{urlparse(link[1]).fragment} not found in the HTML. \n")
-    
-    print('Hint: Use $x("XPath") in the browser console to find the element.')
-    
+    if invalid_internal_links or invalid_fragment_links:
+        print("ERROR with the following internal links:")
+        for item in invalid_internal_links:
+            link = item[0]
+            status_code = item[1]
+            print(f"On page: {link[0]} \nto: {link[1]} \nwith XPath: {link[2]}")
+            print(f"Status code: {status_code} \n")
+
+        for link in invalid_fragment_links:
+            print(f"On page: {link[0]} \nto: {link[1]} \nwith XPath: {link[2]}")
+            print(f"Fragment #{urlparse(link[1]).fragment} not found in the HTML. \n")
+
+        print('Hint: Use $x("XPath") in the browser console to find the element.')
+
     sys.exit(1) # Fail the build if there are invalid links
