@@ -91,6 +91,7 @@ function transformErrors(errors: RJSFValidationError[]) {
 }
 
 function postprocessFormData(data: Record<string, unknown>) {
+  delete data?.uw_gitlab;
   for (const path of cryptPaths) {
     for (const { value, path: actualPath } of getValuesFromPath(
       data,
