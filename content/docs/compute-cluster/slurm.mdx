@@ -560,6 +560,11 @@ To get notified on Discord instead, pass a webhook URL (create one in your Disco
 watcloud subscription <job_id> --discord <webhook_url>
 ```
 
+To avoid pasting the webhook every time, export it from your shell profile (e.g. `~/.bashrc`) and pass `--discord` without a value:
+```bash
+export WATCLOUD_DISCORD_WEBHOOK=<webhook_url>
+```
+
 An example email is shown below: 
 <div style={{ width: 500 }}>
   <Picture image={ComputeClusterNotifierEmail} alt="Example job completion email notification" />
