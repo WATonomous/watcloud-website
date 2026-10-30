@@ -1,6 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import nextra from 'nextra'
 import { withSentryConfig } from "@sentry/nextjs/config"
 import withBundleAnalyzer from "@next/bundle-analyzer"
+
+const FIXTURES_DIR = fileURLToPath(new URL('./build/fixtures/', import.meta.url))
 
 // Original Next.js config
 const nextConfig = {
@@ -24,7 +27,25 @@ const nextConfig = {
       "next.config.mjs",
       "postcss.config.js",
     ]
-  }
+  },
+  webpack(config, { defaultLoaders }) {
+    // Nextra walks the whole git history for every MDX file that isn't in it: https://github.com/shuding/nextra/issues/4781
+    const mdxRule = config.module.rules.find(rule => rule?.oneOf && String(rule.test) === String(/\.mdx?$/))
+    const nextraLoader = mdxRule?.oneOf.at(-1).use.at(-1)
+    if (!nextraLoader?.loader?.endsWith('loader.cjs')) {
+      throw new Error("Nextra's MDX rule not found, update the fixture rule in next.config.mjs")
+    }
+    mdxRule.exclude = FIXTURES_DIR
+    config.module.rules.push({
+      test: /\.mdx$/,
+      include: FIXTURES_DIR,
+      use: [defaultLoaders.babel, {
+        loader: fileURLToPath(new URL('./scripts/mdx-fixture-loader.cjs', import.meta.url)),
+        options: nextraLoader.options,
+      }],
+    })
+    return config
+  },
 }
 
 // Add Nextra config
