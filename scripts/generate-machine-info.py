@@ -106,11 +106,11 @@ def get_hosted_storage(data_path, host_name):
             continue
         
         if line not in mount_to_size:
-            raise Exception(f"Mountpoint {line} not found in df log")
-        
+            print(f"WARNING: {host_name}: export {line} is not mounted", file=sys.stderr)
+
         exports.append({
             "mountpoint": line,
-            "size_bytes": mount_to_size[line],
+            "size_bytes": mount_to_size.get(line),
         })
 
     return [{**e, "mountpoint": USER_MOUNTPOINTS.get(e["mountpoint"], e["mountpoint"])} for e in exports]

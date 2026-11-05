@@ -309,7 +309,7 @@ export function MachineCard({
                                     {machine.hosted_storage.length ? machine.hosted_storage.map((storage, index) => {
                                         return (
                                             <li key={index} className="my-0">
-                                                {storage['mountpoint']} ({bytesToSize(parseInt(storage['size_bytes'] || "0"), 0)})
+                                                {storage['mountpoint']} ({storage['size_bytes'] ? bytesToSize(parseInt(storage['size_bytes']), 0) : "size unavailable"})
                                             </li>
                                         )
                                     }) : "None"}
