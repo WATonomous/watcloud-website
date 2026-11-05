@@ -76,6 +76,12 @@ def get_lsb_release_info(data_path, host_name):
         "description": lsb_release_info_dict["Description"],
     }
 
+# NFS export -> where users find it, per ansible/roles/ubuntu_dev_vm/files/auto.ansible-role-ubuntu_dev_vm
+USER_MOUNTPOINTS = {
+    "/data-pool/nfs-export": "/mnt/wato-drive",
+    "/mnt/wato-drive2-export": "/mnt/wato-drive2",
+}
+
 def get_hosted_storage(data_path, host_name):
     exportfs_path = Path(data_path, "general", host_name, "exportfs.log")
     df_path = Path(data_path, "general", host_name, "df-total.log")
@@ -106,8 +112,8 @@ def get_hosted_storage(data_path, host_name):
             "mountpoint": line,
             "size_bytes": mount_to_size[line],
         })
-    
-    return exports
+
+    return [{**e, "mountpoint": USER_MOUNTPOINTS.get(e["mountpoint"], e["mountpoint"])} for e in exports]
 
 def get_mounts_with_quotas(host):
     mounts = host.get("mounts", [])
