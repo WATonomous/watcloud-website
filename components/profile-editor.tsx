@@ -88,7 +88,14 @@ export function ProfileEditor() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="someone@example.com" {...field} />
+                  <Input
+                    type="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    placeholder="someone@example.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
                   This is the contact email that you specified during

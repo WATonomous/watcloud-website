@@ -356,6 +356,11 @@ function CustomBaseInputTemplate(props: BaseInputTemplateProps) {
   const inputProps = {
     ...rest,
     ...getInputProps(schema, type, options),
+    ...(type === "email" && {
+      autoCapitalize: "none",
+      autoCorrect: "off",
+      spellCheck: false,
+    }),
   };
 
   let inputValue;
