@@ -289,7 +289,7 @@ export function SubscribeDialog() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input placeholder="Email Address" {...field} />
+                                    <Input type="email" placeholder="Email Address" {...field} />
                                 </FormControl>
                                 <FormMessage>
                                     {form.formState.errors.email?.message}
