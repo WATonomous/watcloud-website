@@ -261,9 +261,9 @@ Do you want to perform these actions?
 ```
 
 If everything looks good, type `yes` and press Enter to apply the changes.
-If you waited too long (more than around 30 seconds), you may get a `401 authentication failure` error.
-This is because the [TOTP](https://en.wikipedia.org/wiki/Time-based_one-time_password) code has expired.
-Simply rerun the command to continue.
+The provisioner has already completed two-factor authentication and shares a ticket with the providers.
+Waiting at this prompt does not require the original TOTP to remain valid.
+The issued ticket is valid for roughly two hours; rerun the provisioner if it expires.
 
 After confirming, you should see the following output:
 
