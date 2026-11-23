@@ -1,7 +1,7 @@
 'use client'
 
 import React from "react";
-import userSchemaJSON from "@/build/fixtures/user.schema.generated.json";
+import userSchemaGeneratedJSON from "@/build/fixtures/user.schema.generated.json";
 import userSchemaValidate from "@/build/fixtures/user.schema.validate";
 import RJSFFields from "@/components/rjsf-fields";
 import RJSFTemplates from "@/components/rjsf-templates";
@@ -43,6 +43,9 @@ import { toast } from "sonner";
 import { SearchParamsProps, withSearchParams } from "@/components/with-search-params";
 import { encodeURI as b64EncodeURI, decode as b64Decode } from "js-base64";
 import { INITIAL_FORM_DATA_QUERY_PARAM } from "@/lib/onboarding-form";
+
+// Inferred JSON types of differing allOf entries gain `key?: undefined`, which JSONSchema7 rejects.
+const userSchemaJSON = userSchemaGeneratedJSON as unknown as JSONSchema7;
 
 export const EXPIRES_AT_QUERY_PARAM = "expires-at";
 const FORM_STATE_KEY = "onboarding-form-state";
