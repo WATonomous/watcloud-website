@@ -1,4 +1,6 @@
 import { Callout } from 'nextra/components'
+import { Link } from 'nextra-theme-docs'
+import websiteConfig from '@/build/fixtures/website-config.json'
 
 # Onboarding Form
 
@@ -8,6 +10,16 @@ Please select the services that you need access to and fill out the required inf
 If you were not told which services to request, please clarify with your WATcloud contact[^watocloud-contact].
 Requesting access to services that you do
 not need will slow down the approval process.
+
+If you're not sure what to select, don't hesitate to ask us on <Link href={`https://discord.gg/${websiteConfig.discord_invite_code}`}>Discord</Link>.
+
+**Joining WATcloud?** Please enable the following:
+- Compute Cluster
+- GitHub (`WATonomous Team`)
+- Google Workspace
+- Discord (`Incoming Member` and `WATcloud`)
+
+Use `@uwaterloo.ca` emails for all email fields.
 
 <Callout type="info">
 **Editing an existing profile?** Please use the [profile editor](./profile-editor) to request for a pre-populated form.
